@@ -84,7 +84,7 @@ class DefaultController extends Controller
 
     private function setDays($presence, $values)
     {
-        $weekdays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $newPresence = $presence;
         $days = false;
         for ($i = 1; $i < count($values); $i++) {
