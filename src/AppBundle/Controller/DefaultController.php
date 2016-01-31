@@ -66,8 +66,15 @@ class DefaultController extends Controller
                     $response = $this->peopleCompact();
                     break;
                 default:
-                    $response = "Try `[home|office]: [mon|tue|wed|thu|fri]..`\n"
-                            . "Or `people` (`compact` on cell)";
+                    $response = "```\n"
+                        . "Help:\n"
+                        . "- Set your home/office/sick/away days:\n"
+                        . "  home|office|sick|away: [mon|tue|wed|thu|fri] ..\n"
+                        . "  (use sick/away again to revert)"
+                        . "  (sick/away with no day informed toggles current day)\n"
+                        . "- See everyone's presence:\n"
+                        . "  people (use compact on cell)\n"
+                        . "```\n";
                     break;
             }
         } else {
