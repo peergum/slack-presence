@@ -51,11 +51,13 @@ class DefaultController extends Controller
                 case 'home':
                 case 'office':
                 case 'sick':
-                case 'vacation':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
                     $this->getDoctrine()->getEntityManager()->persist($user);
                     $this->getDoctrine()->getEntityManager()->flush();
                     $response .= $this->people();
+                    break;
+                    break;
+                case 'away':
                     break;
                 case 'people':
                 case 'list':
@@ -84,16 +86,35 @@ class DefaultController extends Controller
 
     private function setDays($presence, $values)
     {
+        $weekdays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $newPresence = $presence;
+        $days = false;
         for ($i = 1; $i < count($values); $i++) {
-            $pos = array_search(substr($values[$i], 0, 3), ['mon', 'tue', 'wed', 'thu', 'fri']);
+            $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos === false) {
                 continue;
             }
+            $days = true;
             if ($values[0] == 'home') {
                 $newPresence |= pow(2, $pos);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
+            } else if ($values[0] == 'sick') {
+                $newPresence ^= ~pow(2, $pos+7);
+            } else if ($values[0] == 'away') {
+                $newPresence ^= ~pow(2, $pos+14);
+            }
+        }
+        if (!$days) {
+            $pos = date("N")-1;
+            if ($values[0] == 'home') {
+                $newPresence |= pow(2, $pos);
+            } else if ($values[0] == 'office') {
+                $newPresence &= ~pow(2, $pos);
+            } else if ($values[0] == 'sick') {
+                $newPresence ^= ~pow(2, $pos+7);
+            } else if ($values[0] == 'away') {
+                $newPresence ^= ~pow(2, $pos+14);
             }
         }
         return $newPresence;
@@ -119,7 +140,11 @@ class DefaultController extends Controller
                 if (!isset($office[$i])) {
                     $office[$i] = 0;
                 }
-                if (pow(2, $i) & $user->getPresence()) {
+                if (pow(2, $i+14) & $user->getPresence()) {
+                    $response .= "   Away    |";
+                } else if (pow(2, $i+7) & $user->getPresence()) {
+                    $response .= "   Sick    |";
+                } else if (pow(2, $i) & $user->getPresence()) {
                     $response .= "   Home    |";
                 } else {
                     $response .= "  Office   |";
@@ -155,7 +180,11 @@ class DefaultController extends Controller
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
-                if (pow(2, $i) & $user->getPresence()) {
+                if (pow(2, $i+14) & $user->getPresence()) {
+                    $response .= " - |";
+                } else if (pow(2, $i+7) & $user->getPresence()) {
+                    $response .= " S |";
+                } if (pow(2, $i) & $user->getPresence()) {
                     $response .= " H |";
                 } else {
                     $response .= " O |";
