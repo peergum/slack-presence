@@ -86,7 +86,7 @@ class DefaultController extends Controller
             }
             $response .= "\n";
         }
-        $response .= '```\n';
+        $response .= "```\n";
 
         return $response;
     }
