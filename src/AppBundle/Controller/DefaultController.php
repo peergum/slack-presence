@@ -2,7 +2,8 @@
 
 namespace AppBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route,
+use AppBundle\Entity\User,
+    Sensio\Bundle\FrameworkExtraBundle\Configuration\Route,
     Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response;
@@ -28,6 +29,20 @@ class DefaultController extends Controller
     public function slackAction(Request $request)
     {
         $args = $request->request->all();
+
+        $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
+        $user = $userRepository->findOneBy([
+            'user' => $args['user_id'],
+        ]);
+        if (!$user) {
+            $user = new User();
+            $user->setUser($args['user_id']);
+            $user->setName($args['user_name']);
+            $user->setPresence(0);
+            $this->getDoctrine()->getEntityManager()->persist($user);
+            $this->getDoctrine()->getEntityManager()->flush();
+        }
+
         $response = "All set, " . $args['user_name'];
         if (strpos($args['text'], 'home:') === 0) {
             $mode = 'home';
@@ -42,18 +57,6 @@ class DefaultController extends Controller
             return new Response(json_encode([
                         'text' => $response,
             ]));
-        }
-
-        $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
-        $user = $userRepository->findOneBy([
-            'user' => $args['user'],
-        ]);
-        if (!$user) {
-            $user = new AppBundle\Entity\User();
-            $user->setUser($args['user']);
-            $user->setName($args['user_name']);
-            $user->setPresence(0);
-            $this->getDoctrine()->getEntityManager()->persist($user);
         }
 
         return new Response(json_encode([
