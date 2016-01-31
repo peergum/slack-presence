@@ -62,9 +62,12 @@ class DefaultController extends Controller
                 case 'show':
                     $response = $this->people();
                     break;
+                case 'compact':
+                    $response = $this->peopleCompact();
+                    break;
                 default:
                     $response = "Try `[home|office]: [mon|tue|wed|thu|fri]..`\n"
-                        . "Or `people`";
+                        . "Or `people` (`compact` on cell)";
                     break;
             }
         } else {
@@ -122,5 +125,33 @@ class DefaultController extends Controller
 
         return $response;
     }
+
+        /**
+     *
+     * @return string
+     */
+    private function peopleCompact()
+    {
+        $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
+
+        $response = "```\n"
+                . "| Person     | M | T | W | T | F |\n"
+                . "|------------|---|---|---|---|---|\n";
+        foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
+            $response .= "| " . sprintf("%10s", $user->getName()) . " |";
+            for ($i = 0; $i < 5; $i++) {
+                if (pow(2, $i) & $user->getPresence()) {
+                    $response .= " H |";
+                } else {
+                    $response .= " O |";
+                }
+            }
+            $response .= "\n";
+        }
+        $response .= "```\n";
+
+        return $response;
+    }
+
 
 }
