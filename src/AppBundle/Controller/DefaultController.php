@@ -105,15 +105,15 @@ class DefaultController extends Controller
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
         $response = "```\n"
-                . "| Person     | Mon | Tue | Wed | Thu | Fri |\n"
-                . "|------------|-----|-----|-----|-----|-----|\n";
+                . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
+                . "|------------|-----------|-----------|-----------|-----------|-----------|\n";
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
                 if (pow(2, $i) & $user->getPresence()) {
-                    $response .= " Hom |";
+                    $response .= "   Home    |";
                 } else {
-                    $response .= " Ofc |";
+                    $response .= "  Office   |";
                 }
             }
             $response .= "\n";
