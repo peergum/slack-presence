@@ -98,9 +98,9 @@ class DefaultController extends Controller
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
             } else if ($values[0] == 'sick') {
-                $newPresence ^= ~pow(2, $pos+7);
+                $newPresence ^= pow(2, $pos+7);
             } else if ($values[0] == 'away') {
-                $newPresence ^= ~pow(2, $pos+14);
+                $newPresence ^= pow(2, $pos+14);
             }
         }
         if (!$days) {
