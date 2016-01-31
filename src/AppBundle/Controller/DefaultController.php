@@ -51,13 +51,11 @@ class DefaultController extends Controller
                 case 'home':
                 case 'office':
                 case 'sick':
+                case 'away':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
                     $this->getDoctrine()->getEntityManager()->persist($user);
                     $this->getDoctrine()->getEntityManager()->flush();
                     $response .= $this->people();
-                    break;
-                    break;
-                case 'away':
                     break;
                 case 'people':
                 case 'list':
