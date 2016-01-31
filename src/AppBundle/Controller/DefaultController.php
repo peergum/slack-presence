@@ -43,7 +43,7 @@ class DefaultController extends Controller
             $this->getDoctrine()->getEntityManager()->flush();
         }
 
-        $response = "All set, " . $args['user_name'];
+        $response = "All set, " . $args['user_name']."\n";
 
         $text = strtolower($args['text']);
         if (preg_match_all('/([a-z]+)/', $text, $matches) > 0) {
@@ -55,11 +55,17 @@ class DefaultController extends Controller
                     $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
                     $this->getDoctrine()->getEntityManager()->persist($user);
                     $this->getDoctrine()->getEntityManager()->flush();
+                    $response .= $this->people();
                     break;
                 case 'people':
                 case 'list':
                 case 'show':
                     $response = $this->people();
+                    break;
+                default:
+                    $response = "I didn't get it...\n"
+                        . "Try `[home|office]: [mon|tue|wed|thu|fri]..`\n"
+                        . "Or `people`";
                     break;
             }
         } else {
@@ -106,9 +112,9 @@ class DefaultController extends Controller
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
                 if (pow(2, $i) & $user->getPresence()) {
-                    $response .= "  H  |";
+                    $response .= " Hom |";
                 } else {
-                    $response .= "  O  |";
+                    $response .= " Ofc |";
                 }
             }
             $response .= "\n";
