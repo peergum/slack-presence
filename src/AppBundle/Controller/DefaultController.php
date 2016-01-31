@@ -108,6 +108,7 @@ class DefaultController extends Controller
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
         $response = "```\n"
+                . "|------------|-----------|-----------|-----------|-----------|-----------|\n";
                 . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
                 . "|------------|-----------|-----------|-----------|-----------|-----------|\n";
         $users = 0;
@@ -132,8 +133,9 @@ class DefaultController extends Controller
         for ($i = 0; $i < 5; $i++) {
             $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
         }
-        $response .= "\n";
-        $response .= "```\n";
+        $response .= "\n"
+            . "|------------|-----------|-----------|-----------|-----------|-----------|\n";
+            . "```\n";
 
         return $response;
     }
