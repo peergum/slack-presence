@@ -37,9 +37,6 @@ class DefaultController extends Controller
             $mode = 'sick';
         } else if (strpos($args['text'], 'people') === 0) {
             $response = $this->people();
-            return new Response(json_encode([
-                        'text' => $response,
-            ]));
         } else {
             $response = "I didn't get it...";
             return new Response(json_encode([
