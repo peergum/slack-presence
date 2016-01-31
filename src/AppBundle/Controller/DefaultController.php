@@ -123,7 +123,7 @@ class DefaultController extends Controller
                     $response .= "   Home    |";
                 } else {
                     $response .= "  Office   |";
-                    $office[$i]++;
+                    $office[$i] ++;
                 }
             }
             $response .= "\n";
@@ -134,8 +134,8 @@ class DefaultController extends Controller
             $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
         }
         $response .= "\n"
-            . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
-            . "```\n";
+                . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
+                . "```\n";
 
         return $response;
     }
@@ -149,6 +149,7 @@ class DefaultController extends Controller
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
         $response = "```\n"
+                . "+------------+---+---+---+---+---+\n"
                 . "| Person     | M | T | W | T | F |\n"
                 . "+------------+---+---+---+---+---+\n";
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
@@ -159,11 +160,11 @@ class DefaultController extends Controller
                 } else {
                     $response .= " O |";
                 }
-            }<?php
+            }
             $response .= "\n";
         }
-        $response .= "```\n";
-
+        $response .= "+------------+---+---+---+---+---+\n"
+                . "```\n";
         return $response;
     }
 
