@@ -63,8 +63,7 @@ class DefaultController extends Controller
                     $response = $this->people();
                     break;
                 default:
-                    $response = "I didn't get it...\n"
-                        . "Try `[home|office]: [mon|tue|wed|thu|fri]..`\n"
+                    $response = "Try `[home|office]: [mon|tue|wed|thu|fri]..`\n"
                         . "Or `people`";
                     break;
             }
