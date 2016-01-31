@@ -127,7 +127,8 @@ class DefaultController extends Controller
             }
             $response .= "\n";
         }
-        $response .= "| " . sprintf("%10s", "At Office") . " |";
+        $response .= "|------------|-----------|-----------|-----------|-----------|-----------|\n";
+        $response .= "| Office --> |";
         for ($i = 0; $i < 5; $i++) {
             $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
         }
