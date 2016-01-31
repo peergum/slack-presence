@@ -43,7 +43,7 @@ class DefaultController extends Controller
             $this->getDoctrine()->getEntityManager()->flush();
         }
 
-        $response = "All set, " . $args['user_name']."\n";
+        $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
         if (preg_match_all('/([a-z]+)/', $text, $matches) > 0) {
@@ -67,7 +67,7 @@ class DefaultController extends Controller
                     break;
                 default:
                     $response = "Try `[home|office]: [mon|tue|wed|thu|fri]..`\n"
-                        . "Or `people` (`compact` on cell)";
+                            . "Or `people` (`compact` on cell)";
                     break;
             }
         } else {
@@ -110,23 +110,31 @@ class DefaultController extends Controller
         $response = "```\n"
                 . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
                 . "|------------|-----------|-----------|-----------|-----------|-----------|\n";
+        $users = 0;
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
+            $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
                 if (pow(2, $i) & $user->getPresence()) {
                     $response .= "   Home    |";
                 } else {
                     $response .= "  Office   |";
+                    $office[$i] = isset($office[$i]) ? $office[$i] + 1 : 1;
                 }
             }
             $response .= "\n";
         }
+        $response .= "| " . sprintf("%10s", "At Office") . " |";
+        for ($i = 0; $i < 5; $i++) {
+            $response .= " " . sprintf("%9.2f", $office[$i] / $users) . " |";
+        }
+        $response .= "\n";
         $response .= "```\n";
 
         return $response;
     }
 
-        /**
+    /**
      *
      * @return string
      */
@@ -152,6 +160,5 @@ class DefaultController extends Controller
 
         return $response;
     }
-
 
 }
