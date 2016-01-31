@@ -10,7 +10,6 @@ use AppBundle\Entity\User,
 
 class DefaultController extends Controller
 {
-
     /**
      * @Route("/", name="homepage")
      */
@@ -30,6 +29,10 @@ class DefaultController extends Controller
     {
         $args = $request->request->all();
 
+        if ($args['token'] != $this->getParameter('slack_token')) {
+            return new Response('Forbidden',403);
+        }
+        
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
         $user = $userRepository->findOneBy([
             'user' => $args['user_id'],
@@ -74,6 +77,7 @@ class DefaultController extends Controller
                         . "  (sick/away with no day informed toggles current day)\n"
                         . "- See everyone's presence:\n"
                         . "  people (use compact on cell)\n"
+                        . "\nNote: outside the #presence channel, use /schedule before your command\n"
                         . "```\n";
                     break;
             }
