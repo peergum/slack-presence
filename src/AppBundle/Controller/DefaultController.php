@@ -44,14 +44,24 @@ class DefaultController extends Controller
         }
 
         $response = "All set, " . $args['user_name'];
-        if (strpos($args['text'], 'home:') === 0) {
-            $mode = 'home';
-        } else if (strpos($args['text'], 'office:') === 0) {
-            $mode = 'office';
-        } else if (strpos($args['text'], 'sick') === 0) {
-            $mode = 'sick';
-        } else if (strpos($args['text'], 'people') === 0) {
-            $response = $this->people();
+
+        $text = strtolower($args['text']);
+        if (preg_match_all('/([a-z]+)/', $text, $matches) > 0) {
+            switch ($matches[0][0]) {
+                case 'home':
+                case 'office':
+                case 'sick':
+                case 'vacation':
+                    $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
+                    $this->getDoctrine()->getEntityManager()->persist($user);
+                    $this->getDoctrine()->getEntityManager()->flush();
+                    break;
+                case 'people':
+                case 'list':
+                case 'show':
+                    $response = $this->people();
+                    break;
+            }
         } else {
             $response = "I didn't get it...";
             return new Response(json_encode([
@@ -62,6 +72,23 @@ class DefaultController extends Controller
         return new Response(json_encode([
                     'text' => $response,
         ]));
+    }
+
+    private function setDays($presence, $values)
+    {
+        $newPresence = $presence;
+        for ($i = 1; $i < count($values); $i++) {
+            $pos = array_search(substr($values[$i], 0, 3), ['mon', 'tue', 'wed', 'thu', 'fri']);
+            if ($pos === false) {
+                continue;
+            }
+            if ($values[0] == 'home') {
+                $newPresence |= pow(2, $pos);
+            } else if ($values[0] == 'office') {
+                $newPresence &= ~pow(2, $pos);
+            }
+        }
+        return $newPresence;
     }
 
     /**
@@ -81,7 +108,7 @@ class DefaultController extends Controller
                 if (pow(2, $i) & $user->getPresence()) {
                     $response .= "  H  |";
                 } else {
-                    $response .= "  *  |";
+                    $response .= "  O  |";
                 }
             }
             $response .= "\n";
