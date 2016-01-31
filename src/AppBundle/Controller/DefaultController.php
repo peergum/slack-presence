@@ -115,18 +115,21 @@ class DefaultController extends Controller
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
+                if (!isset($office[$i])) {
+                    $office[$i] = 0;
+                }
                 if (pow(2, $i) & $user->getPresence()) {
                     $response .= "   Home    |";
                 } else {
                     $response .= "  Office   |";
-                    $office[$i] = isset($office[$i]) ? $office[$i] + 1 : 1;
+                    $office[$i]++;
                 }
             }
             $response .= "\n";
         }
         $response .= "| " . sprintf("%10s", "At Office") . " |";
         for ($i = 0; $i < 5; $i++) {
-            $response .= " " . sprintf("%9.2f", $office[$i] / $users) . " |";
+            $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
         }
         $response .= "\n";
         $response .= "```\n";
