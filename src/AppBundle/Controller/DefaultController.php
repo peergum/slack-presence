@@ -108,9 +108,9 @@ class DefaultController extends Controller
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
         $response = "```\n"
-                . "|------------|-----------|-----------|-----------|-----------|-----------|\n"
+                . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
                 . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
-                . "|------------|-----------|-----------|-----------|-----------|-----------|\n";
+                . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
         $users = 0;
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
             $users++;
@@ -128,13 +128,13 @@ class DefaultController extends Controller
             }
             $response .= "\n";
         }
-        $response .= "|------------|-----------|-----------|-----------|-----------|-----------|\n";
+        $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
         $response .= "| Office --> |";
         for ($i = 0; $i < 5; $i++) {
             $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
         }
         $response .= "\n"
-            . "|------------|-----------|-----------|-----------|-----------|-----------|\n"
+            . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
             . "```\n";
 
         return $response;
@@ -150,7 +150,7 @@ class DefaultController extends Controller
 
         $response = "```\n"
                 . "| Person     | M | T | W | T | F |\n"
-                . "|------------|---|---|---|---|---|\n";
+                . "+------------+---+---+---+---+---+\n";
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
@@ -159,7 +159,7 @@ class DefaultController extends Controller
                 } else {
                     $response .= " O |";
                 }
-            }
+            }<?php
             $response .= "\n";
         }
         $response .= "```\n";
