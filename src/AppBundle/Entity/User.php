@@ -1,0 +1,112 @@
+<?php
+
+namespace AppBundle\Entity;
+
+/**
+ * User
+ */
+class User
+{
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var string
+     */
+    private $user;
+
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return User
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set user
+     *
+     * @param string $user
+     *
+     * @return User
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return string
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+    /**
+     * @var integer
+     */
+    private $presence;
+
+
+    /**
+     * Set presence
+     *
+     * @param integer $presence
+     *
+     * @return User
+     */
+    public function setPresence($presence)
+    {
+        $this->presence = $presence;
+
+        return $this;
+    }
+
+    /**
+     * Get presence
+     *
+     * @return integer
+     */
+    public function getPresence()
+    {
+        return $this->presence;
+    }
+}
