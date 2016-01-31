@@ -76,7 +76,7 @@ class DefaultController extends Controller
                 . "| Person     | Mon | Tue | Wed | Thu | Fri |\n"
                 . "|------------|-----|-----|-----|-----|-----|\n";
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
-            $response .= "| " . sprintf("%10s", $user->getName()) . " | ";
+            $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
                 if (pow(2, $i) & $user->getPresence()) {
                     $response .= "  H  |";
