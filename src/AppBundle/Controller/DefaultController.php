@@ -85,12 +85,12 @@ class DefaultController extends Controller
             $response = "I didn't get it...";
             return new Response(json_encode([
                         'text' => $response,
-            ]));
+            ]),200,['content-type' => 'application/json']);
         }
 
         return new Response(json_encode([
                     'text' => $response,
-        ]));
+        ]),200,['content-type' => 'application/json']);
     }
 
     private function setDays($presence, $values)
