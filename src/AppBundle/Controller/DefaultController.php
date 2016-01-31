@@ -32,7 +32,7 @@ class DefaultController extends Controller
         if ($args['token'] != $this->getParameter('slack_token')) {
             return new Response('Forbidden',403);
         }
-        
+
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
         $user = $userRepository->findOneBy([
             'user' => $args['user_id'],
