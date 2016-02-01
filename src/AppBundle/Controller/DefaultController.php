@@ -85,7 +85,7 @@ class DefaultController extends Controller
                     break;
             }
         } else {
-            $response = "I didn't get it...";
+            $response = "Sorry, I didn't get it... try with `help`";
             return new Response(json_encode([
                         'text' => $response,
                     ]), 200, ['content-type' => 'application/json']);
@@ -242,8 +242,9 @@ class DefaultController extends Controller
             CURLOPT_POSTFIELDS => [
                 'payload' => $payload,
             ],
+            CURLOPT_RETURNTRANSFER => true
         ]);
-        curl_exec($curl);
+        $result = curl_exec($curl);
     }
 
 }
