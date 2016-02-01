@@ -181,7 +181,7 @@ class DefaultController extends Controller
             }
             $response .= "\n";
         }
-        if (!$user) {
+        if (count($userList)>1) {
             $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
             $response .= "| Office --> |";
             for ($i = 0; $i < 5; $i++) {
