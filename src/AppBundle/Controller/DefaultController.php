@@ -10,6 +10,7 @@ use AppBundle\Entity\User,
 
 class DefaultController extends Controller
 {
+
     /**
      * @Route("/", name="homepage")
      */
@@ -29,9 +30,8 @@ class DefaultController extends Controller
     {
         $args = $request->request->all();
 
-        if ($args['token'] != $this->getParameter('slack_command_token')
-                && $args['token'] != $this->getParameter('slack_channel_token')) {
-            return new Response('Forbidden',403);
+        if ($args['token'] != $this->getParameter('slack_command_token') && $args['token'] != $this->getParameter('slack_channel_token')) {
+            return new Response('Forbidden', 403);
         }
 
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
@@ -61,6 +61,7 @@ class DefaultController extends Controller
                     $this->getDoctrine()->getEntityManager()->persist($user);
                     $this->getDoctrine()->getEntityManager()->flush();
                     $response .= $this->people();
+                    $this->showUpdate($user);
                     break;
                 case 'people':
                 case 'list':
@@ -72,27 +73,27 @@ class DefaultController extends Controller
                     break;
                 default:
                     $response = "```\n"
-                        . "Help:\n"
-                        . "- Set your home/office/sick/away days:\n"
-                        . "  home|office|sick|away|travel: [mon|tue|wed|thu|fri] ..\n"
-                        . "  (use sick/away/travel again to revert)"
-                        . "  (sick/away/travel with no day informed toggles current day)\n"
-                        . "- See everyone's presence:\n"
-                        . "  people (use compact on cell)\n"
-                        . "\nNote: outside the #presence channel, use /schedule before your command\n"
-                        . "```\n";
+                            . "Help:\n"
+                            . "- Set your home/office/sick/away days:\n"
+                            . "  home|office|sick|away|travel: [mon|tue|wed|thu|fri] ..\n"
+                            . "  (use sick/away/travel again to revert)"
+                            . "  (sick/away/travel with no day informed toggles current day)\n"
+                            . "- See everyone's presence:\n"
+                            . "  people (use compact on cell)\n"
+                            . "\nNote: outside the #presence channel, use /schedule before your command\n"
+                            . "```\n";
                     break;
             }
         } else {
             $response = "I didn't get it...";
             return new Response(json_encode([
                         'text' => $response,
-            ]),200,['content-type' => 'application/json']);
+                    ]), 200, ['content-type' => 'application/json']);
         }
 
         return new Response(json_encode([
                     'text' => $response,
-        ]),200,['content-type' => 'application/json']);
+                ]), 200, ['content-type' => 'application/json']);
     }
 
     private function setDays($presence, $values)
@@ -111,55 +112,65 @@ class DefaultController extends Controller
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
             } else if ($values[0] == 'sick') {
-                $newPresence ^= pow(2, $pos+7);
+                $newPresence ^= pow(2, $pos + 7);
             } else if ($values[0] == 'away') {
-                $newPresence ^= pow(2, $pos+14);
+                $newPresence ^= pow(2, $pos + 14);
             } else if ($values[0] == 'travel') {
-                $newPresence ^= pow(2, $pos+21);
+                $newPresence ^= pow(2, $pos + 21);
             }
         }
         if (!$days) {
-            $pos = date("N")-1;
+            $pos = date("N") - 1;
             if ($values[0] == 'home') {
                 $newPresence |= pow(2, $pos);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
             } else if ($values[0] == 'sick') {
-                $newPresence ^= pow(2, $pos+7);
+                $newPresence ^= pow(2, $pos + 7);
             } else if ($values[0] == 'away') {
-                $newPresence ^= pow(2, $pos+14);
+                $newPresence ^= pow(2, $pos + 14);
             } else if ($values[0] == 'travel') {
-                $newPresence ^= pow(2, $pos+21);
+                $newPresence ^= pow(2, $pos + 21);
             }
         }
         return $newPresence;
     }
 
     /**
-     *
+     * @param User|null $user
      * @return string
      */
-    private function people()
+    private function people($user = null)
     {
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
-        $response = "```\n"
-                . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
-                . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
-                . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
+        if (!$user) {
+            $response = "```\n"
+                    . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
+                    . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
+                    . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
+            $userList = $userRepository->findBy([], ['name' => 'ASC']);
+        } else {
+            $response = "```\n"
+                    . "             +-----------+-----------+-----------+-----------+-----------+\n"
+                    . "             | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
+                    . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
+            $userList = [ $user];
+        }
         $users = 0;
-        foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
+
+        foreach ($userList as $user) {
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
                 if (!isset($office[$i])) {
                     $office[$i] = 0;
                 }
-                if (pow(2, $i+21) & $user->getPresence()) {
+                if (pow(2, $i + 21) & $user->getPresence()) {
                     $response .= "  Travel   |";
-                } else if (pow(2, $i+14) & $user->getPresence()) {
+                } else if (pow(2, $i + 14) & $user->getPresence()) {
                     $response .= "   Away    |";
-                } else if (pow(2, $i+7) & $user->getPresence()) {
+                } else if (pow(2, $i + 7) & $user->getPresence()) {
                     $response .= "   Sick    |";
                 } else if (pow(2, $i) & $user->getPresence()) {
                     $response .= "   Home    |";
@@ -170,13 +181,15 @@ class DefaultController extends Controller
             }
             $response .= "\n";
         }
-        $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
-        $response .= "| Office --> |";
-        for ($i = 0; $i < 5; $i++) {
-            $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
+        if (!$user) {
+            $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
+            $response .= "| Office --> |";
+            for ($i = 0; $i < 5; $i++) {
+                $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
+            }
+            $response .= "\n";
         }
-        $response .= "\n"
-                . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
+        $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n"
                 . "```\n";
 
         return $response;
@@ -197,11 +210,11 @@ class DefaultController extends Controller
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
-                if (pow(2, $i+21) & $user->getPresence()) {
+                if (pow(2, $i + 21) & $user->getPresence()) {
                     $response .= " T |";
-                } else if (pow(2, $i+14) & $user->getPresence()) {
+                } else if (pow(2, $i + 14) & $user->getPresence()) {
                     $response .= " - |";
-                } else if (pow(2, $i+7) & $user->getPresence()) {
+                } else if (pow(2, $i + 7) & $user->getPresence()) {
                     $response .= " S |";
                 } if (pow(2, $i) & $user->getPresence()) {
                     $response .= " H |";
@@ -214,6 +227,24 @@ class DefaultController extends Controller
         $response .= "+------------+---+---+---+---+---+\n"
                 . "```\n";
         return $response;
+    }
+
+    private function showUpdate(User $user)
+    {
+        $response = $user->getName()." updated his/her weekly presence:\n";
+        $response .= $this->people($user);
+        $payload = json_encode([
+                "text" => $response,
+                "channel" => "@phil",
+        ]);
+        $curl = curl_init($this->getParameter("slack_post_url"));
+        curl_setopt_array($curl, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'payload' => $payload,
+            ],
+        ]);
+        curl_exec($curl);
     }
 
 }

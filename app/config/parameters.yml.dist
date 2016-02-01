@@ -20,3 +20,4 @@ parameters:
 
     slack_command_token: something
     slack_channel_token: something
+    slack_post_url: someUrl
