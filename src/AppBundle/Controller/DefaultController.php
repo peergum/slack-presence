@@ -29,7 +29,8 @@ class DefaultController extends Controller
     {
         $args = $request->request->all();
 
-        if ($args['token'] != $this->getParameter('slack_token')) {
+        if ($args['token'] != $this->getParameter('slack_command_token')
+                && $args['token'] != $this->getParameter('slack_channel_token')) {
             return new Response('Forbidden',403);
         }
 
