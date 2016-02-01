@@ -235,7 +235,6 @@ class DefaultController extends Controller
         $response .= $this->people($user);
         $payload = json_encode([
                 "text" => $response,
-                "channel" => "@phil",
         ]);
         $curl = curl_init($this->getParameter("slack_post_url"));
         curl_setopt_array($curl, [
