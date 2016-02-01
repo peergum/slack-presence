@@ -56,6 +56,7 @@ class DefaultController extends Controller
                 case 'office':
                 case 'sick':
                 case 'away':
+                case 'travel':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
                     $this->getDoctrine()->getEntityManager()->persist($user);
                     $this->getDoctrine()->getEntityManager()->flush();
@@ -73,7 +74,7 @@ class DefaultController extends Controller
                     $response = "```\n"
                         . "Help:\n"
                         . "- Set your home/office/sick/away days:\n"
-                        . "  home|office|sick|away: [mon|tue|wed|thu|fri] ..\n"
+                        . "  home|office|sick|away|travel: [mon|tue|wed|thu|fri] ..\n"
                         . "  (use sick/away again to revert)"
                         . "  (sick/away with no day informed toggles current day)\n"
                         . "- See everyone's presence:\n"
@@ -113,6 +114,8 @@ class DefaultController extends Controller
                 $newPresence ^= pow(2, $pos+7);
             } else if ($values[0] == 'away') {
                 $newPresence ^= pow(2, $pos+14);
+            } else if ($values[0] == 'travel') {
+                $newPresence ^= pow(2, $pos+21);
             }
         }
         if (!$days) {
@@ -125,6 +128,8 @@ class DefaultController extends Controller
                 $newPresence ^= pow(2, $pos+7);
             } else if ($values[0] == 'away') {
                 $newPresence ^= pow(2, $pos+14);
+            } else if ($values[0] == 'travel') {
+                $newPresence ^= pow(2, $pos+21);
             }
         }
         return $newPresence;
@@ -150,7 +155,9 @@ class DefaultController extends Controller
                 if (!isset($office[$i])) {
                     $office[$i] = 0;
                 }
-                if (pow(2, $i+14) & $user->getPresence()) {
+                if (pow(2, $i+21) & $user->getPresence()) {
+                    $response .= "  Travel   |";
+                } else if (pow(2, $i+14) & $user->getPresence()) {
                     $response .= "   Away    |";
                 } else if (pow(2, $i+7) & $user->getPresence()) {
                     $response .= "   Sick    |";
@@ -190,7 +197,9 @@ class DefaultController extends Controller
         foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             for ($i = 0; $i < 5; $i++) {
-                if (pow(2, $i+14) & $user->getPresence()) {
+                if (pow(2, $i+21) & $user->getPresence()) {
+                    $response .= " T |";
+                } else if (pow(2, $i+14) & $user->getPresence()) {
                     $response .= " - |";
                 } else if (pow(2, $i+7) & $user->getPresence()) {
                     $response .= " S |";
