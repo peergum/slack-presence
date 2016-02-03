@@ -27,8 +27,8 @@ AppBundle\Entity\User:
 
     oneToMany:
         periods:
+            orderBy: { 'id': 'DESC' }
             targetEntity: Period
             mappedBy: user
-            cascade: [ "all" ]
-
+            cascade: [ ALL ]
     lifecycleCallbacks: {  }

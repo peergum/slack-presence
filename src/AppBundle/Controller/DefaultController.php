@@ -11,17 +11,14 @@ use AppBundle\Entity\Period,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response;
 
-class DefaultController extends Controller
-{
+class DefaultController extends Controller {
 
     /**
      * @Route("/", name="homepage")
      */
-    public function indexAction(Request $request)
-    {
+    public function indexAction(Request $request) {
         // replace this example code with whatever you need
-        return $this->render('default/index.html.twig',
-                        [
+        return $this->render('default/index.html.twig', [
                     'base_dir' => realpath($this->container->getParameter('kernel.root_dir') . '/..'),
         ]);
     }
@@ -29,8 +26,7 @@ class DefaultController extends Controller
     /**
      * @Route("/slack", name="slack")
      */
-    public function slackAction(Request $request)
-    {
+    public function slackAction(Request $request) {
         $args = $request->query->all();
 
         if ($args['token'] != $this->getParameter('slack_command_token') && $args['token'] != $this->getParameter('slack_channel_token')) {
@@ -62,7 +58,7 @@ class DefaultController extends Controller
                 case 'sick':
                 case 'away':
                 case 'travel':
-                    $this->getPeriod($user,$matches[0]);
+                    $this->getPeriod($user, $matches[0]);
                     $response .= $this->people();
                     $this->showUpdate($user);
                 case 'people':
@@ -96,6 +92,7 @@ class DefaultController extends Controller
         $this->getDoctrine()->getManager()->persist($user);
         $this->getDoctrine()->getManager()->flush();
 
+        //return new Response($response,200,['content-type' => "text/plain"]);
         return new Response(json_encode([
                     'text' => $response,
                 ]), 200, ['content-type' => 'application/json']);
@@ -110,7 +107,7 @@ class DefaultController extends Controller
     private function getPeriod(&$user, $values) {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $days = false;
-        $today = date("N")-1;
+        $today = date("N") - 1;
         for ($i = 1; $i < count($values); $i++) {
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos === false || $pos < $today) {
@@ -118,23 +115,72 @@ class DefaultController extends Controller
             }
             $days = true;
             $start = new DateTime();
-            $start->setTime(0,0,0);
-            $interval = new DateInterval("P".($pos-$today)."D");
+            $start->setTime(0, 0, 0);
+            $interval = new DateInterval("P" . ($pos - $today) . "D");
             $start->add($interval);
-            $stop=clone($start);
+            $stop = clone($start);
             $stop->add(new DateInterval("PT23H59M59S"));
+            $newStart = clone($stop);
+            $newStart->add(new \DateInterval('PT1S'));
+            $newStop = clone($start);
+            $newStop->sub(new \DateInterval('PT1S'));
             $foundPeriod = false;
-            var_dump($start);
-            var_dump($stop);
-            foreach($user->getPeriods() as $period) {
-                var_dump($period->getStart());
-                var_dump($period->getStop());
-                if ($period->getType() == $values[0]
-                        && $start->diff($period->getStart())->days<=0
-                        && $stop->diff($period->getStop())->days>=0) {
+//            var_dump($start);
+//            var_dump($stop);
+            foreach ($user->getPeriods() as $period) {
+//                var_dump($period->getStart());
+//                var_dump($period->getStop());
+                if ($period->getType() == $values[0] && $start == $period->getStart() && $stop == $period->getStop()) {
+                    // same period: remove
                     $foundPeriod = true;
-                    echo "FOUND!";
+                    $user->removePeriod($period);
+                    $this->getDoctrine()->getManager()->remove($period);
                     break;
+                } else if ($period->getType() == $values[0] && $period->getStart() <= $start && $period->getStop() >= $stop) {
+                    // new period inside: split
+                    $foundPeriod = true;
+                    if ($period->getStart() == $start) {
+                        $period->setStart($newStart);
+                        $this->getDoctrine()->getManager()->persist($period);
+                    } else if ($period->getStop() == $stop) {
+                        $period->setStop($newStop);
+                        $this->getDoctrine()->getManager()->persist($period);
+                    } else if ($period->getStart() < $start) {
+                        $newPeriod = new Period();
+                        $newPeriod->setType($values[0]);
+                        $newPeriod->setStart($stop);
+                        $newPeriod->setStop($period->getStop());
+                        $newPeriod->setUser($user);
+                        $this->getDoctrine()->getManager()->persist($newPeriod);
+                        $period->setStop($start);
+                        $user->addPeriod($newPeriod);
+                    } else if ($period->getStop() > $stop) {
+                        $newPeriod = new Period();
+                        $newPeriod->setType($values[0]);
+                        $newPeriod->setStart($start);
+                        $newPeriod->setStop($period->getStart());
+                        $newPeriod->setUser($user);
+                        $this->getDoctrine()->getManager()->persist($newPeriod);
+                        $period->setStart($stop);
+                        $user->addPeriod($newPeriod);
+                    }
+                    break;
+                } else if ($period->getType() == $values[0] && $period->getStart() >= $start && $period->getStop() <= $stop) {
+                    $foundPeriod = true;
+                    // new period outside: merge
+                    $period->setStart($start);
+                    $period->setStop($stop);
+                    $this->getDoctrine()->getManager()->persist($period);
+                } else if ($period->getType() == $values[0] && $period->getStop() == $newStop || $period->getStart() == $newStart) {
+                    $foundPeriod = true;
+                    // periods overwrite or is adjacent: keep longest
+                    if ($start < $period->getStart()) {
+                        $period->setStart($start);
+                    }
+                    if ($stop > $period->getStop()) {
+                        $period->setStop($stop);
+                    }
+                    $this->getDoctrine()->getManager()->persist($period);
                 }
             }
             if (!$foundPeriod) {
@@ -142,13 +188,16 @@ class DefaultController extends Controller
                 $period->setType($values[0]);
                 $period->setStart($start);
                 $period->setStop($stop);
+                $period->setUser($user);
                 $user->addPeriod($period);
+                $this->getDoctrine()->getManager()->persist($period);
             }
+            $this->getDoctrine()->getManager()->persist($user);
+            $this->getDoctrine()->getManager()->flush();
         }
     }
 
-    private function setDays($presence, $values)
-    {
+    private function setDays($presence, $values) {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $newPresence = $presence;
         $days = false;
@@ -179,8 +228,7 @@ class DefaultController extends Controller
      * @param User|null $user
      * @return string
      */
-    private function people($user = null)
-    {
+    private function people($user = null) {
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
         if (!$user) {
@@ -194,22 +242,24 @@ class DefaultController extends Controller
                     . "             +-----------+-----------+-----------+-----------+-----------+\n"
                     . "             | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
                     . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
-            $userList = [ $user ];
+            $userList = [ $user];
         }
         $users = 0;
 
-        $today = date("N")-1;
+        $today = date("N") - 1;
         $weekStart = new DateTime();
-        $weekStart->setTime(0,0,0);
-        if ($today>4) {
-            $weekStart->add(new DateInterval("P".(7-$today)."D"));
-        } else if ($today>0) {
-            $weekStart->sub(new DateInterval("P".$today."D"));
+        $weekStart->setTime(0, 0, 0);
+        if ($today > 4) {
+            $weekStart->add(new DateInterval("P" . (7 - $today) . "D"));
+        } else if ($today > 0) {
+            $weekStart->sub(new DateInterval("P" . $today . "D"));
         }
         foreach ($userList as $user) {
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             $day = clone($weekStart);
+            $status = "";
+            $days = 0;
             for ($i = 0; $i < 5; $i++) {
                 $day->add(new DateInterval("P1D"));
                 if (!isset($office[$i])) {
@@ -217,30 +267,44 @@ class DefaultController extends Controller
                 }
                 $foundPeriod = false;
                 foreach ($user->getPeriods() as $period) {
-                    if ($day->diff($period->getStart())->days>0
-                            && ($day->diff($period->getStop())->days<=0)) {
-                        $response .= sprintf(" %-9s |",  ucfirst($period->getType()));
+                    if ($period->getStart() <= $day && $period->getStop() > $day) {
+                        $newStatus = ucfirst($period->getType());
                         $foundPeriod = true;
                         break;
                     }
                 }
-                if ($foundPeriod) {
-                    continue;
+                if (!$foundPeriod) {
+                    if (pow(2, $i) & $user->getPresence()) {
+                        $newStatus = "Home";
+                    } else {
+                        $newStatus = "Office";
+                        $office[$i] ++;
+                    }
                 }
-                if (pow(2, $i) & $user->getPresence()) {
-                    $response .= " Home      |";
+                if ($status == "" || $newStatus == $status) {
+                    $days++;
                 } else {
-                    $response .= " Office    |";
-                    $office[$i] ++;
+                    $size = 11 + 12 * ( $days - 1 );
+                    $start = ($size - strlen($status)) / 2;
+                    $end = 12 * $days - strlen($status) - $start;
+                    $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
+                    $days = 1;
                 }
+                $status = $newStatus;
+            }
+            if ($newStatus == $status) {
+                $size = 11 + 12 * ( $days - 1 );
+                $start = ($size - strlen($status)) / 2;
+                $end = 12 * $days - strlen($status) - $start;
+                $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
             }
             $response .= "\n";
         }
-        if (count($userList)>1) {
+        if (count($userList) > 1) {
             $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
             $response .= "| Office --> |";
             for ($i = 0; $i < 5; $i++) {
-                $response .= " " . sprintf("%8d%%", 100 * $office[$i] / $users) . " |";
+                $response .= " " . sprintf("    %2d/2d%%", $office[$i], 100 * $office[$i] / $users) . " |";
             }
             $response .= "\n";
         }
@@ -254,8 +318,7 @@ class DefaultController extends Controller
      *
      * @return string
      */
-    private function peopleCompact()
-    {
+    private function peopleCompact() {
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
         $response = "```\n"
@@ -284,13 +347,12 @@ class DefaultController extends Controller
         return $response;
     }
 
-    private function showUpdate(User $user)
-    {
+    private function showUpdate(User $user) {
         return;
-        $response = $user->getName()." updated his/her weekly presence:\n";
+        $response = $user->getName() . " updated his/her weekly presence:\n";
         $response .= $this->people($user);
         $payload = json_encode([
-                "text" => $response,
+            "text" => $response,
         ]);
         $curl = curl_init($this->getParameter("slack_post_url"));
         curl_setopt_array($curl, [

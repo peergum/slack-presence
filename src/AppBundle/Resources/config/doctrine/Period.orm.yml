@@ -27,8 +27,8 @@ AppBundle\Entity\Period:
         targetEntity: User
         inversedBy: periods
         joinColumn:
-          name: id
+          name: user_id
           referencedColumnName: id
-
+        onDelete: CASCADE
     lifecycleCallbacks: {  }
 
