@@ -8,6 +8,12 @@ AppBundle\Entity\User:
             id: true
             generator:
                 strategy: AUTO
+    indexes:
+        name:
+            columns: [ name ]
+        user:
+            columns: [ user ]
+
     fields:
         name:
             type: string
@@ -18,4 +24,11 @@ AppBundle\Entity\User:
             unique: true
         presence:
             type: integer
+
+    oneToMany:
+        periods:
+            targetEntity: Period
+            mappedBy: user
+            cascade: [ "all" ]
+
     lifecycleCallbacks: {  }

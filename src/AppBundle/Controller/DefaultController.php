@@ -2,7 +2,10 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\User,
+use AppBundle\Entity\Period,
+    AppBundle\Entity\User,
+    DateInterval,
+    DateTime,
     Sensio\Bundle\FrameworkExtraBundle\Configuration\Route,
     Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Request,
@@ -28,7 +31,7 @@ class DefaultController extends Controller
      */
     public function slackAction(Request $request)
     {
-        $args = $request->request->all();
+        $args = $request->query->all();
 
         if ($args['token'] != $this->getParameter('slack_command_token') && $args['token'] != $this->getParameter('slack_channel_token')) {
             return new Response('Forbidden', 403);
@@ -43,8 +46,6 @@ class DefaultController extends Controller
             $user->setUser($args['user_id']);
             $user->setName($args['user_name']);
             $user->setPresence(0);
-            $this->getDoctrine()->getEntityManager()->persist($user);
-            $this->getDoctrine()->getEntityManager()->flush();
         }
 
         $response = "All set, " . $args['user_name'] . "\n";
@@ -54,15 +55,16 @@ class DefaultController extends Controller
             switch ($matches[0][0]) {
                 case 'home':
                 case 'office':
-                case 'sick':
-                case 'away':
-                case 'travel':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
-                    $this->getDoctrine()->getEntityManager()->persist($user);
-                    $this->getDoctrine()->getEntityManager()->flush();
                     $response .= $this->people();
                     $this->showUpdate($user);
                     break;
+                case 'sick':
+                case 'away':
+                case 'travel':
+                    $this->getPeriod($user,$matches[0]);
+                    $response .= $this->people();
+                    $this->showUpdate($user);
                 case 'people':
                 case 'list':
                 case 'show':
@@ -91,9 +93,58 @@ class DefaultController extends Controller
                     ]), 200, ['content-type' => 'application/json']);
         }
 
+        $this->getDoctrine()->getManager()->persist($user);
+        $this->getDoctrine()->getManager()->flush();
+
         return new Response(json_encode([
                     'text' => $response,
                 ]), 200, ['content-type' => 'application/json']);
+    }
+
+    /**
+     *
+     * @param type $periods
+     * @param type $values
+     * @return Period
+     */
+    private function getPeriod(&$user, $values) {
+        $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $days = false;
+        $today = date("N")-1;
+        for ($i = 1; $i < count($values); $i++) {
+            $pos = array_search(substr($values[$i], 0, 3), $weekDays);
+            if ($pos === false || $pos < $today) {
+                continue;
+            }
+            $days = true;
+            $start = new DateTime();
+            $start->setTime(0,0,0);
+            $interval = new DateInterval("P".($pos-$today)."D");
+            $start->add($interval);
+            $stop=clone($start);
+            $stop->add(new DateInterval("PT23H59M59S"));
+            $foundPeriod = false;
+            var_dump($start);
+            var_dump($stop);
+            foreach($user->getPeriods() as $period) {
+                var_dump($period->getStart());
+                var_dump($period->getStop());
+                if ($period->getType() == $values[0]
+                        && $start->diff($period->getStart())->days<=0
+                        && $stop->diff($period->getStop())->days>=0) {
+                    $foundPeriod = true;
+                    echo "FOUND!";
+                    break;
+                }
+            }
+            if (!$foundPeriod) {
+                $period = new Period();
+                $period->setType($values[0]);
+                $period->setStart($start);
+                $period->setStop($stop);
+                $user->addPeriod($period);
+            }
+        }
     }
 
     private function setDays($presence, $values)
@@ -111,12 +162,6 @@ class DefaultController extends Controller
                 $newPresence |= pow(2, $pos);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
-            } else if ($values[0] == 'sick') {
-                $newPresence ^= pow(2, $pos + 7);
-            } else if ($values[0] == 'away') {
-                $newPresence ^= pow(2, $pos + 14);
-            } else if ($values[0] == 'travel') {
-                $newPresence ^= pow(2, $pos + 21);
             }
         }
         if (!$days) {
@@ -125,12 +170,6 @@ class DefaultController extends Controller
                 $newPresence |= pow(2, $pos);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
-            } else if ($values[0] == 'sick') {
-                $newPresence ^= pow(2, $pos + 7);
-            } else if ($values[0] == 'away') {
-                $newPresence ^= pow(2, $pos + 14);
-            } else if ($values[0] == 'travel') {
-                $newPresence ^= pow(2, $pos + 21);
             }
         }
         return $newPresence;
@@ -155,27 +194,43 @@ class DefaultController extends Controller
                     . "             +-----------+-----------+-----------+-----------+-----------+\n"
                     . "             | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
                     . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
-            $userList = [ $user];
+            $userList = [ $user ];
         }
         $users = 0;
 
+        $today = date("N")-1;
+        $weekStart = new DateTime();
+        $weekStart->setTime(0,0,0);
+        if ($today>4) {
+            $weekStart->add(new DateInterval("P".(7-$today)."D"));
+        } else if ($today>0) {
+            $weekStart->sub(new DateInterval("P".$today."D"));
+        }
         foreach ($userList as $user) {
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
+            $day = clone($weekStart);
             for ($i = 0; $i < 5; $i++) {
+                $day->add(new DateInterval("P1D"));
                 if (!isset($office[$i])) {
                     $office[$i] = 0;
                 }
-                if (pow(2, $i + 21) & $user->getPresence()) {
-                    $response .= "  Travel   |";
-                } else if (pow(2, $i + 14) & $user->getPresence()) {
-                    $response .= "   Away    |";
-                } else if (pow(2, $i + 7) & $user->getPresence()) {
-                    $response .= "   Sick    |";
-                } else if (pow(2, $i) & $user->getPresence()) {
-                    $response .= "   Home    |";
+                $foundPeriod = false;
+                foreach ($user->getPeriods() as $period) {
+                    if ($day->diff($period->getStart())->days>0
+                            && ($day->diff($period->getStop())->days<=0)) {
+                        $response .= sprintf(" %-9s |",  ucfirst($period->getType()));
+                        $foundPeriod = true;
+                        break;
+                    }
+                }
+                if ($foundPeriod) {
+                    continue;
+                }
+                if (pow(2, $i) & $user->getPresence()) {
+                    $response .= " Home      |";
                 } else {
-                    $response .= "  Office   |";
+                    $response .= " Office    |";
                     $office[$i] ++;
                 }
             }
@@ -231,6 +286,7 @@ class DefaultController extends Controller
 
     private function showUpdate(User $user)
     {
+        return;
         $response = $user->getName()." updated his/her weekly presence:\n";
         $response .= $this->people($user);
         $payload = json_encode([

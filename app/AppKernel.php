@@ -1,28 +1,42 @@
 <?php
 
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Config\Loader\LoaderInterface;
+use AppBundle\AppBundle,
+    Doctrine\Bundle\DoctrineBundle\DoctrineBundle,
+    Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle,
+    Sensio\Bundle\DistributionBundle\SensioDistributionBundle,
+    Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle,
+    Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle,
+    Symfony\Bundle\DebugBundle\DebugBundle,
+    Symfony\Bundle\FrameworkBundle\FrameworkBundle,
+    Symfony\Bundle\MonologBundle\MonologBundle,
+    Symfony\Bundle\SecurityBundle\SecurityBundle,
+    Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle,
+    Symfony\Bundle\TwigBundle\TwigBundle,
+    Symfony\Bundle\WebProfilerBundle\WebProfilerBundle,
+    Symfony\Component\Config\Loader\LoaderInterface,
+    Symfony\Component\HttpKernel\Kernel;
 
 class AppKernel extends Kernel
 {
     public function registerBundles()
     {
         $bundles = [
-            new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new Symfony\Bundle\SecurityBundle\SecurityBundle(),
-            new Symfony\Bundle\TwigBundle\TwigBundle(),
-            new Symfony\Bundle\MonologBundle\MonologBundle(),
-            new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
-            new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
-            new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new AppBundle\AppBundle(),
+            new FrameworkBundle(),
+            new SecurityBundle(),
+            new TwigBundle(),
+            new MonologBundle(),
+            new SwiftmailerBundle(),
+            new DoctrineBundle(),
+            new SensioFrameworkExtraBundle(),
+            new AppBundle(),
+            new DoctrineMigrationsBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
-            $bundles[] = new Symfony\Bundle\DebugBundle\DebugBundle();
-            $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
-            $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
-            $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
+            $bundles[] = new DebugBundle();
+            $bundles[] = new WebProfilerBundle();
+            $bundles[] = new SensioDistributionBundle();
+            $bundles[] = new SensioGeneratorBundle();
         }
 
         return $bundles;

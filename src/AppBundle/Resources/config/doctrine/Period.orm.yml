@@ -1,0 +1,34 @@
+AppBundle\Entity\Period:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\PeriodRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    indexes:
+        start:
+            columns: [ start ]
+        stop:
+            columns: [ stop ]
+    fields:
+        start:
+            type: datetime
+        stop:
+            type: datetime
+        type:
+            type: string
+            length: '10'
+
+    manyToOne:
+      user:
+        targetEntity: User
+        inversedBy: periods
+        joinColumn:
+          name: id
+          referencedColumnName: id
+
+    lifecycleCallbacks: {  }
+

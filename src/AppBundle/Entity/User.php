@@ -109,4 +109,50 @@ class User
     {
         return $this->presence;
     }
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $periods;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->periods = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add period
+     *
+     * @param \AppBundle\Entity\Period $period
+     *
+     * @return User
+     */
+    public function addPeriod(\AppBundle\Entity\Period $period)
+    {
+        $this->periods[] = $period;
+
+        return $this;
+    }
+
+    /**
+     * Remove period
+     *
+     * @param \AppBundle\Entity\Period $period
+     */
+    public function removePeriod(\AppBundle\Entity\Period $period)
+    {
+        $this->periods->removeElement($period);
+    }
+
+    /**
+     * Get periods
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPeriods()
+    {
+        return $this->periods;
+    }
 }
