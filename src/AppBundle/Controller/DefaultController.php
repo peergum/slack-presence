@@ -299,9 +299,10 @@ class DefaultController extends Controller {
                 $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
             }
             $response .= "\n";
+            $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
+
         }
         if (count($userList) > 1) {
-            $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
             $response .= "| Office --> |";
             for ($i = 0; $i < 5; $i++) {
                 $response .= " " . sprintf("    %2d/2d%%", $office[$i], 100 * $office[$i] / $users) . " |";
