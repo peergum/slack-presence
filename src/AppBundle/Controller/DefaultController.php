@@ -78,7 +78,7 @@ class DefaultController extends Controller {
                             . "  (sick/away/travel with no day informed toggles current day)\n"
                             . "- See everyone's presence:\n"
                             . "  people (use compact on cell)\n"
-                            . "\nNote: outside the #presence channel, use /schedule before your command\n"
+                            . "\nNote: outside the #presence channel, use /presence before your command\n"
                             . "```\n";
                     break;
             }
