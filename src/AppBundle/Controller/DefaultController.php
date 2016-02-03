@@ -27,7 +27,7 @@ class DefaultController extends Controller {
      * @Route("/slack", name="slack")
      */
     public function slackAction(Request $request) {
-        $args = $request->query->all();
+        $args = $request->request->all();
 
         if ($args['token'] != $this->getParameter('slack_command_token') && $args['token'] != $this->getParameter('slack_channel_token')) {
             return new Response('Forbidden', 403);
