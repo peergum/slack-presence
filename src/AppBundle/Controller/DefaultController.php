@@ -284,19 +284,19 @@ class DefaultController extends Controller {
                 if ($status == "" || $newStatus == $status) {
                     $days++;
                 } else {
-                    $size = 11 + 12 * ( $days - 1 );
+                    $size = 9 + 12 * ( $days - 1 );
                     $start = ($size - strlen($status)) / 2;
                     $end = 12 * $days - strlen($status) - $start;
-                    $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
+                    $response .= " ".str_repeat("=", $start) . $status . str_repeat("=", $end) . " |";
                     $days = 1;
                 }
                 $status = $newStatus;
             }
             if ($newStatus == $status) {
-                $size = 11 + 12 * ( $days - 1 );
+                $size = 9 + 12 * ( $days - 1 );
                 $start = ($size - strlen($status)) / 2;
                 $end = 12 * $days - strlen($status) - $start;
-                $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
+                $response .= " ".str_repeat("=", $start) . $status . str_repeat("=", $end) . " |";
             }
             $response .= "\n";
         }
