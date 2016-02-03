@@ -304,7 +304,7 @@ class DefaultController extends Controller {
             $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
             $response .= "| Office --> |";
             for ($i = 0; $i < 5; $i++) {
-                $response .= " " . sprintf("   %2d/%2d%%", $office[$i], 100 * $office[$i] / $users) . " |";
+                $response .= " " . sprintf(" %2d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
             }
             $response .= "\n";
         }
