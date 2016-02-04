@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller {
 
-    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thrusday', 'Friday'];
+    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
     /**
      * @Route("/", name="homepage")
@@ -226,7 +226,7 @@ class DefaultController extends Controller {
     }
 
     /**
-     * 
+     *
      * @param type $size
      * @return string
      */
@@ -240,7 +240,7 @@ class DefaultController extends Controller {
     }
 
     /**
-     * 
+     *
      * @param type $size
      * @return string
      */
