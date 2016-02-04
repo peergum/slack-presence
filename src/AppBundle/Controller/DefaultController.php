@@ -247,7 +247,7 @@ class DefaultController extends Controller {
     private function getHeader($size) {
 
         $result = $this->separator($size);
-        $result = '| Person     |';
+        $result .= '| Person     |';
         foreach ($this->weekDays as $day) {
             $result .= sprintf(" %-" . $size . "s |", substr($day, 0, $size));
         }
