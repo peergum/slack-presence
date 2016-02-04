@@ -2,16 +2,18 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Period,
-    AppBundle\Entity\User,
-    DateInterval,
-    DateTime,
-    Sensio\Bundle\FrameworkExtraBundle\Configuration\Route,
-    Symfony\Bundle\FrameworkBundle\Controller\Controller,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response;
+use AppBundle\Entity\Period;
+use AppBundle\Entity\User;
+use DateInterval;
+use DateTime;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller {
+
+    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thrusday', 'Friday'];
 
     /**
      * @Route("/", name="homepage")
@@ -27,7 +29,11 @@ class DefaultController extends Controller {
      * @Route("/slack", name="slack")
      */
     public function slackAction(Request $request) {
-        $args = $request->request->all();
+        if ($request->getMethod() == 'GET') {
+            $args = $request->query->all();
+        } else {
+            $args = $request->request->all();
+        }
 
         if ($args['token'] != $this->getParameter('slack_command_token') && $args['token'] != $this->getParameter('slack_channel_token')) {
             return new Response('Forbidden', 403);
@@ -67,7 +73,7 @@ class DefaultController extends Controller {
                     $response = $this->people();
                     break;
                 case 'compact':
-                    $response = $this->peopleCompact();
+                    $response = $this->people(null, "compact");
                     break;
                 default:
                     $response = "```\n"
@@ -92,7 +98,6 @@ class DefaultController extends Controller {
         $this->getDoctrine()->getManager()->persist($user);
         $this->getDoctrine()->getManager()->flush();
 
-        //return new Response($response,200,['content-type' => "text/plain"]);
         return new Response(json_encode([
                     'text' => $response,
                 ]), 200, ['content-type' => 'application/json']);
@@ -125,11 +130,7 @@ class DefaultController extends Controller {
             $newStop = clone($start);
             $newStop->sub(new \DateInterval('PT1S'));
             $foundPeriod = false;
-//            var_dump($start);
-//            var_dump($stop);
             foreach ($user->getPeriods() as $period) {
-//                var_dump($period->getStart());
-//                var_dump($period->getStop());
                 if ($period->getType() == $values[0] && $start == $period->getStart() && $stop == $period->getStop()) {
                     // same period: remove
                     $foundPeriod = true;
@@ -225,25 +226,46 @@ class DefaultController extends Controller {
     }
 
     /**
+     * 
+     * @param type $size
+     * @return string
+     */
+    private function separator($size) {
+        $result = '+------------+';
+        foreach ($this->weekDays as $day) {
+            $result .= str_repeat('-', $size + 2) . '+';
+        }
+        $result .= "\n";
+        return $result;
+    }
+
+    /**
+     * 
+     * @param type $size
+     * @return string
+     */
+    private function getHeader($size) {
+
+        $result = $this->separator($size);
+        $result = '| Person     |';
+        foreach ($this->weekDays as $day) {
+            $result .= sprintf(" %-" . $size . "s |", substr($day, 0, $size));
+        }
+        $result .= "\n";
+        $result .= $this->separator($size);
+        return $result;
+    }
+
+    /**
      * @param User|null $user
      * @return string
      */
-    private function people($user = null) {
+    private function people($user = null, $mode = 'full') {
+        $cellSize = $mode == 'full' ? 9 : 1;
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
 
-        if (!$user) {
-            $response = "```\n"
-                    . "+------------+-----------+-----------+-----------+-----------+-----------+\n"
-                    . "| Person     | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
-                    . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
-            $userList = $userRepository->findBy([], ['name' => 'ASC']);
-        } else {
-            $response = "```\n"
-                    . "             +-----------+-----------+-----------+-----------+-----------+\n"
-                    . "             | Monday    | Tuesday   | Wednesday | Thursday  | Friday    |\n"
-                    . "+------------+-----------+-----------+-----------+-----------+-----------+\n";
-            $userList = [ $user];
-        }
+        $response = "```\n" . $this->getHeader($cellSize);
+        $userList = $user ? [ $user] : $userRepository->findBy([], ['name' => 'ASC']);
         $users = 0;
 
         $today = date("N") - 1;
@@ -261,7 +283,6 @@ class DefaultController extends Controller {
             $status = "";
             $days = 0;
             for ($i = 0; $i < 5; $i++) {
-                $day->add(new DateInterval("P1D"));
                 if (!isset($office[$i])) {
                     $office[$i] = 0;
                 }
@@ -284,32 +305,34 @@ class DefaultController extends Controller {
                 if ($status == "" || $newStatus == $status) {
                     $days++;
                 } else {
-                    $size = 11 + 12 * ( $days - 1 );
-                    $start = ($size - strlen($status)) / 2;
-                    $end = 12 * $days - strlen($status) - $start;
-                    $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
+                    $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
+                    $size = ($cellSize + 3) * $days - 1;
+                    $start = floor(($size - strlen($showStatus)) / 2);
+                    $end = $size - strlen($showStatus) - $start +1;
+                    $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     $days = 1;
                 }
                 $status = $newStatus;
+                $day->add(new DateInterval("P1D"));
             }
             if ($newStatus == $status) {
-                $size = 11 + 12 * ( $days - 1 );
-                $start = ($size - strlen($status)) / 2;
-                $end = 12 * $days - strlen($status) - $start;
-                $response .= str_repeat(" ", $start) . $status . str_repeat(" ", $end) . "|";
+                $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
+                $size = ($cellSize + 3) * $days - 1;
+                $start = floor(($size - strlen($showStatus)) / 2);
+                $end = $size - strlen($showStatus) - $start;
+                $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
             }
             $response .= "\n";
         }
-        if (count($userList) > 1) {
-            $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n";
+        if (count($userList) > 1 && $mode == 'full') {
+            $response .= $this->separator($cellSize);
             $response .= "| Office --> |";
             for ($i = 0; $i < 5; $i++) {
                 $response .= " " . sprintf(" %2d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
             }
             $response .= "\n";
         }
-        $response .= "+------------+-----------+-----------+-----------+-----------+-----------+\n"
-                . "```\n";
+        $response .= $this->separator($cellSize) . "```\n";
 
         return $response;
     }
@@ -348,6 +371,7 @@ class DefaultController extends Controller {
     }
 
     private function showUpdate(User $user) {
+        return;
         $response = $user->getName() . " updated his/her weekly presence:\n";
         $response .= $this->people($user);
         $payload = json_encode([
