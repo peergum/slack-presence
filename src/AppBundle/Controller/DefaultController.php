@@ -371,7 +371,7 @@ class DefaultController extends Controller {
     }
 
     private function showUpdate(User $user) {
-        return;
+//        return;
         $response = $user->getName() . " updated his/her weekly presence:\n";
         $response .= $this->people($user);
         $payload = json_encode([
