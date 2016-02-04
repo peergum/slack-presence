@@ -308,7 +308,7 @@ class DefaultController extends Controller {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                     $size = ($cellSize + 3) * $days - 1;
                     $start = floor(($size - strlen($showStatus)) / 2);
-                    $end = $size - strlen($showStatus) - $start +1;
+                    $end = $size - strlen($showStatus) - $start + 1;
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     $days = 1;
                 }
