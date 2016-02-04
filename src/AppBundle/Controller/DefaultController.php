@@ -289,7 +289,7 @@ class DefaultController extends Controller {
                 $foundPeriod = false;
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = ucfirst($period->getType());
+                        $newStatus = strtoupper($period->getType());
                         $foundPeriod = true;
                         break;
                     }
