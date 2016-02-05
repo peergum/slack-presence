@@ -64,7 +64,7 @@ class DefaultController extends Controller {
                 case 'sick':
                 case 'away':
                 case 'travel':
-                    $this->getPeriod($user, $matches[1]);
+                    $response .= $this->getPeriod($user, $matches[1]);
                     $response .= $this->people();
                     if ($request->getMethod() !== 'GET') {
                         $this->showUpdate($user);
@@ -109,9 +109,10 @@ class DefaultController extends Controller {
      *
      * @param User $user
      * @param array $values
-     * @return Period
+     * @return string
      */
     private function getPeriod(&$user, $values) {
+        $response = '';
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
         $days = false;
@@ -119,6 +120,7 @@ class DefaultController extends Controller {
         for ($i = 1; $i < count($values); $i++) {
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos !== false && $pos < $today) {
+                $response .= "Note: [".$values[$i]."] -> you cannot change days before today this week\n";
                 continue;
             }
             if ($pos !== false) {
@@ -134,6 +136,7 @@ class DefaultController extends Controller {
                 $stopMonth = array_search(substr($dates[3], 0, 3), $months);
                 $stopDay = $dates[4];
                 if ($startMonth === false || $stopMonth === false || !$startDay || $startDay>31 || !$stopDay || $stopDay>31 ) {
+                    $response .= "Note: [".$values[$i]."] -> I don't get it...\n";
                     continue;
                 }
                 $year = date("Y");
@@ -144,6 +147,7 @@ class DefaultController extends Controller {
                 $stop->setDate($year,$stopMonth+1,$stopDay);
                 $stop->setTime(23,59,59);
             } else {
+                $response .= "Note: [".$values[$i]."] -> what do you mean?\n";
                 continue;
             }
             $newStart = clone($stop);
@@ -217,6 +221,7 @@ class DefaultController extends Controller {
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
         }
+        return $response;
     }
 
     private function setDays($presence, $values) {
