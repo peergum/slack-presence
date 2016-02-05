@@ -275,7 +275,7 @@ class DefaultController extends Controller {
         $result = $this->separator($size);
         $result .= '| Person     |';
         foreach ($this->weekDays as $i => $day) {
-            $result .= sprintf(" %-" . $size . "s |", substr($i == $today ? "Today" : $day, 0, $size));
+            $result .= sprintf(" %-" . $size . "s |", substr($i == $today && $size > 5 ? "Today" : $day, 0, $size));
         }
         $result .= "\n";
         $result .= $this->separator($size);
