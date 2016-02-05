@@ -354,7 +354,7 @@ class DefaultController extends Controller {
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
                         $newStatus = strtoupper($period->getType());
-                        $response .= ($newStatus != $status ? $newStatus : '')." -> ".$period->getStop()->format('M j');
+                        $response .= ($newStatus != $status ? (" ".$newStatus) : '')." -> ".$period->getStop()->format('M j');
                         break;
                     }
                 }
