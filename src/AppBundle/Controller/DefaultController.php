@@ -334,7 +334,7 @@ class DefaultController extends Controller {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                     $size = ($cellSize + 3) * $days - 1;
                     $start = floor(($size - strlen($showStatus)) / 2);
-                    $end = $size - strlen($showStatus) - $start +1;
+                    $end = $size - strlen($showStatus) - $start;
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     $days = 1;
                 }
@@ -345,7 +345,7 @@ class DefaultController extends Controller {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
-                $end = $size - strlen($showStatus) - $start +1;
+                $end = $size - strlen($showStatus) - $start;
                 $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
             }
             if ($mode == 'full') {
