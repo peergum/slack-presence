@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller {
 
-    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thrusday', 'Friday'];
+    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
     /**
      * @Route("/", name="homepage")
@@ -247,7 +247,7 @@ class DefaultController extends Controller {
     }
 
     /**
-     * 
+     *
      * @param type $size
      * @return string
      */
@@ -261,14 +261,14 @@ class DefaultController extends Controller {
     }
 
     /**
-     * 
+     *
      * @param type $size
      * @return string
      */
     private function getHeader($size) {
 
         $result = $this->separator($size);
-        $result = '| Person     |';
+        $result .= '| Person     |';
         foreach ($this->weekDays as $day) {
             $result .= sprintf(" %-" . $size . "s |", substr($day, 0, $size));
         }
@@ -310,7 +310,7 @@ class DefaultController extends Controller {
                 $foundPeriod = false;
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = ucfirst($period->getType());
+                        $newStatus = strtoupper($period->getType());
                         $foundPeriod = true;
                         break;
                     }
