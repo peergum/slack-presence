@@ -53,7 +53,7 @@ class DefaultController extends Controller {
         $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
-        if (preg_match_all('/([a-z]+|[a-z]+[0-9]+ ?- ?[a-z]+[0-9]+)/g', $text, $matches) > 0) {
+        if (preg_match_all('/([a-z]+(?:[0-9]+ ?- ?[a-z]+[0-9]+)?)/', $text, $matches) > 0) {
             switch ($matches[1][0]) {
                 case 'home':
                 case 'office':
@@ -64,7 +64,7 @@ class DefaultController extends Controller {
                 case 'sick':
                 case 'away':
                 case 'travel':
-                    $this->getPeriod($user, $matches);
+                    $this->getPeriod($user, $matches[1]);
                     $response .= $this->people();
                     if ($request->getMethod() !== 'GET') {
                         $this->showUpdate($user);
@@ -128,7 +128,7 @@ class DefaultController extends Controller {
                 $start->add($interval);
                 $stop = clone($start);
                 $stop->setTime(23,59,59);
-            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+) ?- ?([a-z]+)([0-9]+)/', $value[$i], $dates) > 0) {
+            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+) ?- ?([a-z]+)([0-9]+)/', $values[$i], $dates) > 0) {
                 $startMonth = array_search(substr($dates[1], 0, 3), $months);
                 $startDay = $dates[2];
                 $stopMonth = array_search(substr($dates[3], 0, 3), $months);
@@ -138,10 +138,10 @@ class DefaultController extends Controller {
                 }
                 $year = date("Y");
                 $start = new Datetime();
-                $start->setDate($year,$startMonth,$startDay);
+                $start->setDate($year,$startMonth+1,$startDay);
                 $start->setTime(0,0,0);
                 $stop = new Datetime();
-                $stop->setDate($year,$stopMonth,$stopDay);
+                $stop->setDate($year,$stopMonth+1,$stopDay);
                 $stop->setTime(23,59,59);
             } else {
                 continue;
@@ -392,7 +392,6 @@ class DefaultController extends Controller {
     }
 
     private function showUpdate(User $user) {
-        return;
         $response = $user->getName() . " updated his/her weekly presence:\n";
         $response .= $this->people($user);
         $payload = json_encode([
