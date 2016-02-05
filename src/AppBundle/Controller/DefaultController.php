@@ -341,7 +341,7 @@ class DefaultController extends Controller {
                 $status = $newStatus;
                 $day->add(new DateInterval("P1D"));
             }
-            if ($days>1) {
+            if ($status == $newStatus) {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
