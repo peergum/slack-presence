@@ -364,7 +364,7 @@ class DefaultController extends Controller {
         }
         if (count($userList) > 1 && $mode == 'full') {
             $response .= $this->separator($cellSize);
-            $response .= "| Office --> |";
+            $response .= "| OFFICE --> |";
             for ($i = 0; $i < 5; $i++) {
                 $response .= " " . sprintf(" %2d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
             }
