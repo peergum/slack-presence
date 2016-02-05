@@ -348,13 +348,15 @@ class DefaultController extends Controller {
                 $end = $size - strlen($showStatus) - $start;
                 $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
             }
-            $day = clone($weekStart);
-            $day->add(new DateInterval("P1W"));
-            foreach ($user->getPeriods() as $period) {
-                if ($period->getStart() <= $day && $period->getStop() > $day) {
-                    $newStatus = strtoupper($period->getType());
-                    $response .= " ".$period->getStart()->format('M j').' - '.$period->getStop()->format('M j').' : '.$period->getType();
-                    break;
+            if ($mode == 'full') {
+                $day = clone($weekStart);
+                $day->add(new DateInterval("P1W"));
+                foreach ($user->getPeriods() as $period) {
+                    if ($period->getStart() <= $day && $period->getStop() > $day) {
+                        $newStatus = strtoupper($period->getType());
+                        $response .= strtoupper($period->getType())." -> ".$period->getStop()->format('M j');
+                        break;
+                    }
                 }
             }
 
