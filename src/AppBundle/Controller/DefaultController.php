@@ -328,7 +328,7 @@ class DefaultController extends Controller {
                         $office[$i] ++;
                     }
                 }
-                if ($status == "" || $newStatus == $status) {
+                if (($today < $i-1 || $today >= $i+1) && ($status == "" || $newStatus == $status)) {
                     $days++;
                 } else {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
