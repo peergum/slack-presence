@@ -61,9 +61,7 @@ class DefaultController extends Controller {
                     $response .= $this->people();
                     $this->showUpdate($user);
                     break;
-                case 'sick':
-                case 'away':
-                case 'travel':
+                case 'set':
                     $response .= $this->getPeriod($user, $matches[1]);
                     $response .= $this->people();
                     if ($request->getMethod() !== 'GET') {
@@ -81,9 +79,10 @@ class DefaultController extends Controller {
                     $response = "```\n"
                             . "Help:\n"
                             . "- Set your home/office/sick/away days:\n"
-                            . "  home|office|sick|away|travel: [mon|tue|wed|thu|fri] ..\n"
-                            . "  (use sick/away/travel again to revert)"
-                            . "  (sick/away/travel with no day informed toggles current day)\n"
+                            . "  home|office: [mon|tue|wed|thu|fri] ..\n"
+                            . "  set <event>: [mon|tue|wed|thu|fri|xxx99-xxx99] ..\n"
+                            . "  (use same command to undo/change)"
+                            . "  (no day or period means today)\n"
                             . "- See everyone's presence:\n"
                             . "  people (use compact on cell)\n"
                             . "\nNote: outside the #presence channel, use /presence before your command\n"
@@ -108,7 +107,7 @@ class DefaultController extends Controller {
     /**
      *
      * @param User $user
-     * @param array $values
+     * @param array $args
      * @return string
      */
     private function getPeriod(&$user, $values) {
@@ -117,6 +116,7 @@ class DefaultController extends Controller {
         $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
         $days = false;
         $today = date("N") - 1;
+        array_shift($values);
         for ($i = 1; $i < count($values); $i++) {
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos !== false && $pos < $today) {
@@ -348,6 +348,16 @@ class DefaultController extends Controller {
                 $end = $size - strlen($showStatus) - $start;
                 $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
             }
+            $day = clone($weekStart);
+            $day->add(new DateInterval("P1W"));
+            foreach ($user->getPeriods() as $period) {
+                if ($period->getStart() <= $day && $period->getStop() > $day) {
+                    $newStatus = strtoupper($period->getType());
+                    $response .= " ".$period->getStart()->format('M j').' - '.$period->getStop()->format('M j').' : '.$period->getType();
+                    break;
+                }
+            }
+
             $response .= "\n";
         }
         if (count($userList) > 1 && $mode == 'full') {
