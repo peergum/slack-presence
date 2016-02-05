@@ -322,9 +322,9 @@ class DefaultController extends Controller {
                 }
                 if (!$foundPeriod) {
                     if (pow(2, $i) & $user->getPresence()) {
-                        $newStatus = "Home";
+                        $newStatus = "HOME";
                     } else {
-                        $newStatus = "Office";
+                        $newStatus = "OFFICE";
                         $office[$i] ++;
                     }
                 }
