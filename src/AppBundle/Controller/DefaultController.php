@@ -113,14 +113,14 @@ class DefaultController extends Controller {
     private function getPeriod(&$user, $values) {
         $response = '';
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
-        $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         $days = false;
         $today = date("N") - 1;
         array_shift($values);
         for ($i = 1; $i < count($values); $i++) {
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos !== false && $pos < $today) {
-                $response .= "Note: [".$values[$i]."] -> you cannot change days before today this week\n";
+                $response .= "Note: [" . $values[$i] . "] -> you cannot change days before today this week\n";
                 continue;
             }
             if ($pos !== false) {
@@ -129,25 +129,25 @@ class DefaultController extends Controller {
                 $interval = new DateInterval("P" . ($pos - $today) . "D");
                 $start->add($interval);
                 $stop = clone($start);
-                $stop->setTime(23,59,59);
+                $stop->setTime(23, 59, 59);
             } else if ($pos === false && preg_match('/([a-z]+)([0-9]+) ?- ?([a-z]+)([0-9]+)/', $values[$i], $dates) > 0) {
                 $startMonth = array_search(substr($dates[1], 0, 3), $months);
                 $startDay = $dates[2];
                 $stopMonth = array_search(substr($dates[3], 0, 3), $months);
                 $stopDay = $dates[4];
-                if ($startMonth === false || $stopMonth === false || !$startDay || $startDay>31 || !$stopDay || $stopDay>31 ) {
-                    $response .= "Note: [".$values[$i]."] -> I don't get it...\n";
+                if ($startMonth === false || $stopMonth === false || !$startDay || $startDay > 31 || !$stopDay || $stopDay > 31) {
+                    $response .= "Note: [" . $values[$i] . "] -> I don't get it...\n";
                     continue;
                 }
                 $year = date("Y");
                 $start = new Datetime();
-                $start->setDate($year,$startMonth+1,$startDay);
-                $start->setTime(0,0,0);
+                $start->setDate($year, $startMonth + 1, $startDay);
+                $start->setTime(0, 0, 0);
                 $stop = new Datetime();
-                $stop->setDate($year,$stopMonth+1,$stopDay);
-                $stop->setTime(23,59,59);
+                $stop->setDate($year, $stopMonth + 1, $stopDay);
+                $stop->setTime(23, 59, 59);
             } else {
-                $response .= "Note: [".$values[$i]."] -> what do you mean?\n";
+                $response .= "Note: [" . $values[$i] . "] -> what do you mean?\n";
                 continue;
             }
             $newStart = clone($stop);
@@ -334,7 +334,7 @@ class DefaultController extends Controller {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                     $size = ($cellSize + 3) * $days - 1;
                     $start = floor(($size - strlen($showStatus)) / 2);
-                    $end = $size - strlen($showStatus) - $start;
+                    $end = $size - strlen($showStatus) - $start +1;
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     $days = 1;
                 }
@@ -345,7 +345,7 @@ class DefaultController extends Controller {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
-                $end = $size - strlen($showStatus) - $start;
+                $end = $size - strlen($showStatus) - $start +1;
                 $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
             }
             if ($mode == 'full') {
@@ -354,7 +354,7 @@ class DefaultController extends Controller {
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
                         $newStatus = strtoupper($period->getType());
-                        $response .= ($newStatus != $status ? (" ".$newStatus) : '')." -> ".$period->getStop()->format('M j');
+                        $response .= ($newStatus != $status ? (" " . $newStatus) : '') . " -> " . $period->getStop()->format('M j');
                         break;
                     }
                 }
@@ -410,7 +410,7 @@ class DefaultController extends Controller {
 
     private function showUpdate(User $user) {
         $response = $user->getName() . " updated his/her weekly presence:\n";
-        $response .= $this->people($user);
+        $response .= $this->people($user,"full");
         $payload = json_encode([
             "text" => $response,
         ]);
