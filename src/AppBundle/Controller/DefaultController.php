@@ -341,7 +341,7 @@ class DefaultController extends Controller {
                 $status = $newStatus;
                 $day->add(new DateInterval("P1D"));
             }
-            if ($newStatus == $status) {
+            if ($days>1) {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
@@ -354,7 +354,7 @@ class DefaultController extends Controller {
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
                         $newStatus = strtoupper($period->getType());
-                        $response .= strtoupper($period->getType())." -> ".$period->getStop()->format('M j');
+                        $response .= ($newStatus != $status ? $newStatus : '')." -> ".$period->getStop()->format('M j');
                         break;
                     }
                 }
