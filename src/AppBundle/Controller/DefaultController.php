@@ -53,20 +53,22 @@ class DefaultController extends Controller {
         $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
-        if (preg_match_all('/([a-z]+)/', $text, $matches) > 0) {
-            switch ($matches[0][0]) {
+        if (preg_match_all('/([a-z]+|[a-z]+[0-9]+ ?- ?[a-z]+[0-9]+)/g', $text, $matches) > 0) {
+            switch ($matches[1][0]) {
                 case 'home':
                 case 'office':
-                    $user->setPresence($this->setDays($user->getPresence(), $matches[0]));
+                    $user->setPresence($this->setDays($user->getPresence(), $matches[1]));
                     $response .= $this->people();
                     $this->showUpdate($user);
                     break;
                 case 'sick':
                 case 'away':
                 case 'travel':
-                    $this->getPeriod($user, $matches[0]);
+                    $this->getPeriod($user, $matches);
                     $response .= $this->people();
-                    $this->showUpdate($user);
+                    if ($request->getMethod() !== 'GET') {
+                        $this->showUpdate($user);
+                    }
                 case 'people':
                 case 'list':
                 case 'show':
@@ -105,26 +107,45 @@ class DefaultController extends Controller {
 
     /**
      *
-     * @param type $periods
-     * @param type $values
+     * @param User $user
+     * @param array $values
      * @return Period
      */
     private function getPeriod(&$user, $values) {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
         $days = false;
         $today = date("N") - 1;
         for ($i = 1; $i < count($values); $i++) {
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
-            if ($pos === false || $pos < $today) {
+            if ($pos !== false && $pos < $today) {
                 continue;
             }
-            $days = true;
-            $start = new DateTime();
-            $start->setTime(0, 0, 0);
-            $interval = new DateInterval("P" . ($pos - $today) . "D");
-            $start->add($interval);
-            $stop = clone($start);
-            $stop->add(new DateInterval("PT23H59M59S"));
+            if ($pos !== false) {
+                $start = new DateTime();
+                $start->setTime(0, 0, 0);
+                $interval = new DateInterval("P" . ($pos - $today) . "D");
+                $start->add($interval);
+                $stop = clone($start);
+                $stop->setTime(23,59,59);
+            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+) ?- ?([a-z]+)([0-9]+)/', $value[$i], $dates) > 0) {
+                $startMonth = array_search(substr($dates[1], 0, 3), $months);
+                $startDay = $dates[2];
+                $stopMonth = array_search(substr($dates[3], 0, 3), $months);
+                $stopDay = $dates[4];
+                if ($startMonth === false || $stopMonth === false || !$startDay || $startDay>31 || !$stopDay || $stopDay>31 ) {
+                    continue;
+                }
+                $year = date("Y");
+                $start = new Datetime();
+                $start->setDate($year,$startMonth,$startDay);
+                $start->setTime(0,0,0);
+                $stop = new Datetime();
+                $stop->setDate($year,$stopMonth,$stopDay);
+                $stop->setTime(23,59,59);
+            } else {
+                continue;
+            }
             $newStart = clone($stop);
             $newStart->add(new \DateInterval('PT1S'));
             $newStop = clone($start);
@@ -371,7 +392,7 @@ class DefaultController extends Controller {
     }
 
     private function showUpdate(User $user) {
-//        return;
+        return;
         $response = $user->getName() . " updated his/her weekly presence:\n";
         $response .= $this->people($user);
         $payload = json_encode([
