@@ -271,11 +271,11 @@ class DefaultController extends Controller {
      * @return string
      */
     private function getHeader($size) {
-
+        $today = date("N")-1;
         $result = $this->separator($size);
         $result .= '| Person     |';
-        foreach ($this->weekDays as $day) {
-            $result .= sprintf(" %-" . $size . "s |", substr($day, 0, $size));
+        foreach ($this->weekDays as $i => $day) {
+            $result .= sprintf(" %-" . $size . "s |", substr($i == $today ? "Today" : $day, 0, $size));
         }
         $result .= "\n";
         $result .= $this->separator($size);
