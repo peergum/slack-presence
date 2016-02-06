@@ -272,14 +272,39 @@ class DefaultController extends Controller {
      */
     private function getHeader($size) {
         $today = date("N")-1;
+        $weekStart = $this->getWeekStart($today);
+        $currentDay = clone($weekStart);
         $result = $this->separator($size);
         $result .= '| Person     |';
         foreach ($this->weekDays as $i => $day) {
-            $result .= sprintf(" %-" . $size . "s |", substr($i == $today && $size > 5 ? "Today" : $day, 0, $size));
+            $theDay = substr($day,0,$size>3 ? $size-3 : $size);
+            if ($size>3) {
+                $theDay .= $currentDay->format(" d");
+            }
+            $start = floor(($size-strlen($theDay))/2);
+            $end = $size - $start - strlen($theDay);
+            $result .= " ".str_repeat(" ",$start).$theDay.str_repeat(" ",$end)." |";
+            $currentDay->add(new DateInterval("P1D"));
         }
         $result .= "\n";
         $result .= $this->separator($size);
         return $result;
+    }
+
+    /**
+     *
+     * @param int $today
+     * @return DateTime
+     */
+    private function getWeekStart($today) {
+        $weekStart = new DateTime();
+        $weekStart->setTime(0, 0, 0);
+        if ($today > 4) {
+            $weekStart->add(new DateInterval("P" . (7 - $today) . "D"));
+        } else if ($today > 0) {
+            $weekStart->sub(new DateInterval("P" . $today . "D"));
+        }
+        return $weekStart;
     }
 
     /**
@@ -295,13 +320,7 @@ class DefaultController extends Controller {
         $users = 0;
 
         $today = date("N") - 1;
-        $weekStart = new DateTime();
-        $weekStart->setTime(0, 0, 0);
-        if ($today > 4) {
-            $weekStart->add(new DateInterval("P" . (7 - $today) . "D"));
-        } else if ($today > 0) {
-            $weekStart->sub(new DateInterval("P" . $today . "D"));
-        }
+        $weekStart = $this->getWeekStart($today);
         foreach ($userList as $user) {
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
@@ -372,39 +391,6 @@ class DefaultController extends Controller {
         }
         $response .= $this->separator($cellSize) . "```\n";
 
-        return $response;
-    }
-
-    /**
-     *
-     * @return string
-     */
-    private function peopleCompact() {
-        $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
-
-        $response = "```\n"
-                . "+------------+---+---+---+---+---+\n"
-                . "| Person     | M | T | W | T | F |\n"
-                . "+------------+---+---+---+---+---+\n";
-        foreach ($userRepository->findBy([], ['name' => 'ASC']) as $user) {
-            $response .= "| " . sprintf("%10s", $user->getName()) . " |";
-            for ($i = 0; $i < 5; $i++) {
-                if (pow(2, $i + 21) & $user->getPresence()) {
-                    $response .= " T |";
-                } else if (pow(2, $i + 14) & $user->getPresence()) {
-                    $response .= " - |";
-                } else if (pow(2, $i + 7) & $user->getPresence()) {
-                    $response .= " S |";
-                } if (pow(2, $i) & $user->getPresence()) {
-                    $response .= " H |";
-                } else {
-                    $response .= " O |";
-                }
-            }
-            $response .= "\n";
-        }
-        $response .= "+------------+---+---+---+---+---+\n"
-                . "```\n";
         return $response;
     }
 
