@@ -314,6 +314,7 @@ class DefaultController extends Controller {
     private function people($user = null, $mode = 'full') {
         $cellSize = $mode == 'full' ? 9 : 1;
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
+        $holidayRepository = $this->getDoctrine()->getRepository('AppBundle:Holiday');
 
         $response = "```\n" . $this->getHeader($cellSize);
         $userList = $user ? [ $user] : $userRepository->findBy([], ['name' => 'ASC']);
@@ -331,12 +332,21 @@ class DefaultController extends Controller {
                 if (!isset($office[$i])) {
                     $office[$i] = 0;
                 }
+                $holiday = $holidayRepository->findOneBy([
+                    'date' => $day,
+                    'location' => $user->getLocation(),
+                ]);
                 $foundPeriod = false;
-                foreach ($user->getPeriods() as $period) {
-                    if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = strtoupper($period->getType());
-                        $foundPeriod = true;
-                        break;
+                if ($holiday) {
+                    $newStatus = $holiday->getName();
+                    $foundPeriod = true;
+                } else {
+                    foreach ($user->getPeriods() as $period) {
+                        if ($period->getStart() <= $day && $period->getStop() > $day) {
+                            $newStatus = strtoupper($period->getType());
+                            $foundPeriod = true;
+                            break;
+                        }
                     }
                 }
                 if (!$foundPeriod) {

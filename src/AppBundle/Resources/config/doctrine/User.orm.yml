@@ -13,7 +13,9 @@ AppBundle\Entity\User:
             columns: [ name ]
         user:
             columns: [ user ]
-
+        location:
+            columns: [ location ]
+            
     fields:
         name:
             type: string
@@ -24,6 +26,9 @@ AppBundle\Entity\User:
             unique: true
         presence:
             type: integer
+        location:
+            type: string
+            length: 2
 
     oneToMany:
         periods:

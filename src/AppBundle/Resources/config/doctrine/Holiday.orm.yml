@@ -1,0 +1,27 @@
+AppBundle\Entity\Holiday:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\HolidayRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    indexes:
+        date:
+            columns: [ date ]
+        name:
+            columns: [ name ]
+    fields:
+        date:
+            type: date
+        name:
+            type: string
+            length: 20
+        location:
+            type: string
+            length: 2
+
+    lifecycleCallbacks: {  }
+
