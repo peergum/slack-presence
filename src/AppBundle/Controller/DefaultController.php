@@ -401,7 +401,7 @@ class DefaultController extends Controller
                             . " "
                             . $showStatus
                             . " "
-                            . substr(" " . str_repeat("-", $end) . "> ", -$end, $end - 1) . "|";
+                            . substr(" " . str_repeat("-", $end) . "> ", -$end+1, $end - 1) . "|";
                 }
             }
             if ($mode == 'full') {
