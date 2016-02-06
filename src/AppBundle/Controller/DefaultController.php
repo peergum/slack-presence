@@ -378,9 +378,11 @@ class DefaultController extends Controller
                     if ($days == 1) {
                         $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     } else {
-                        $response .= substr(" <" . str_repeat("-", $start) . " ", 0, $start)
+                        $response .= substr(" <" . str_repeat("-", $start) . " ", 0, $start - 1)
+                                . " "
                                 . $showStatus
-                                . substr(" " . str_repeat("-", $end) . "> ", -$end, $end) . "|";
+                                . " "
+                                . substr(" " . str_repeat("-", $end) . "> ", -$end, $end - 1) . "|";
                     }
                     $days = 1;
                 }
@@ -395,9 +397,11 @@ class DefaultController extends Controller
                 if ($days == 1) {
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                 } else {
-                    $response .= substr(" <" . str_repeat("-", $start) . " ", 0, $start)
+                    $response .= substr(" <" . str_repeat("-", $start) . " ", 0, $start - 1)
+                            . " "
                             . $showStatus
-                            . substr(" " . str_repeat("-", $end) . "> ", -$end, $end) . "|";
+                            . " "
+                            . substr(" " . str_repeat("-", $end) . "> ", -$end, $end - 1) . "|";
                 }
             }
             if ($mode == 'full') {
