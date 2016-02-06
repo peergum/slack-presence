@@ -364,7 +364,10 @@ class DefaultController extends Controller {
                     $size = ($cellSize + 3) * $days - 1;
                     $start = floor(($size - strlen($showStatus)) / 2);
                     $end = $size - strlen($showStatus) - $start;
-                    $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
+//                    $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
+                    $response .= substr(" <".str_repeat("-", $start)." ",0,$start)
+                            . $showStatus
+                            . substr(" ".str_repeat("-", $end)."> ",-$end,$end) . "|";
                     $days = 1;
                 }
                 $status = $newStatus;
@@ -375,7 +378,10 @@ class DefaultController extends Controller {
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
                 $end = $size - strlen($showStatus) - $start;
-                $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
+                //$response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
+                $response .= substr(" <".str_repeat("-", $start)." ",0,$start)
+                        . $showStatus
+                        . substr(" ".str_repeat("-", $end)."> ",-$end,$end) . "|";
             }
             if ($mode == 'full') {
                 $day = clone($weekStart);
