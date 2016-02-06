@@ -349,7 +349,7 @@ class DefaultController extends Controller
                 ]);
                 $foundPeriod = false;
                 if ($holiday) {
-                    $newStatus = $holiday->getName();
+                    $newStatus = $mode == "full" ? $holiday->getName() : "*";
                     $foundPeriod = true;
                 } else {
                     foreach ($user->getPeriods() as $period) {
