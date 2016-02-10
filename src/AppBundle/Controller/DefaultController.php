@@ -57,7 +57,7 @@ class DefaultController extends Controller
         $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
-        if (preg_match_all('/([a-z]+(?:[0-9]+ ?- ?[a-z]+[0-9]+)?)/', $text, $matches) > 0) {
+        if (preg_match_all('/([a-z]+(?:[0-9]+(?: ?- ?[a-z]+[0-9]+)?)?)/', $text, $matches) > 0) {
             switch ($matches[1][0]) {
                 case 'home':
                 case 'office':
@@ -135,10 +135,14 @@ class DefaultController extends Controller
                 $start->add($interval);
                 $stop = clone($start);
                 $stop->setTime(23, 59, 59);
-            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+) ?- ?([a-z]+)([0-9]+)/',
+            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+)(?: ?- ?([a-z]+)([0-9]+))?/',
                             $values[$i], $dates) > 0) {
                 $startMonth = array_search(substr($dates[1], 0, 3), $months);
                 $startDay = $dates[2];
+                if (count($dates)<4) {
+                    $dates[3]=$dates[1];
+                    $dates[4]=$dates[2];
+                }
                 $stopMonth = array_search(substr($dates[3], 0, 3), $months);
                 $stopDay = $dates[4];
                 if ($startMonth === false || $stopMonth === false || !$startDay || $startDay > 31 || !$stopDay || $stopDay > 31) {
@@ -382,7 +386,7 @@ class DefaultController extends Controller
                                 . " "
                                 . $showStatus
                                 . " "
-                                . substr(" " . str_repeat("-", $end) . "> ", -$end+1, $end - 1) . "|";
+                                . substr(" " . str_repeat("-", $end) . "> ", -$end + 1, $end - 1) . "|";
                     }
                     $days = 1;
                 }
@@ -401,7 +405,7 @@ class DefaultController extends Controller
                             . " "
                             . $showStatus
                             . " "
-                            . substr(" " . str_repeat("-", $end) . "> ", -$end+1, $end - 1) . "|";
+                            . substr(" " . str_repeat("-", $end) . "> ", -$end + 1, $end - 1) . "|";
                 }
             }
             if ($mode == 'full') {
