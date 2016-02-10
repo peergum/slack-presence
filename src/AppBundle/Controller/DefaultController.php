@@ -84,7 +84,7 @@ class DefaultController extends Controller
                             . "Help:\n"
                             . "- Set your home/office/sick/away days:\n"
                             . "  home|office: [mon|tue|wed|thu|fri] ..\n"
-                            . "  set <event>: [mon|tue|wed|thu|fri|xxx99-xxx99] ..\n"
+                            . "  set <event>: [mon|tue|wed|thu|fri|xxx99|xxx99-xxx99] ..\n"
                             . "  (use same command to undo/change)"
                             . "  (no day or period means today)\n"
                             . "- See everyone's presence:\n"
