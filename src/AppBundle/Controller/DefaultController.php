@@ -282,11 +282,11 @@ class DefaultController extends Controller {
      * @param type $size
      * @return string
      */
-    private function getHeader($size,$weeks) {
+    private function getHeader($size, $weeks) {
         $today = date("N") - 1;
         $weekStart = $this->getWeekStart($today);
         $currentDay = clone($weekStart);
-        $result = $this->separator($size,$weeks);
+        $result = $this->separator($size, $weeks);
         $result .= '| Person     |';
         for ($i = 0; $i < $weeks; $i++) {
             foreach ($this->weekDays as $j => $day) {
@@ -304,7 +304,7 @@ class DefaultController extends Controller {
             }
         }
         $result .= "\n";
-        $result .= $this->separator($size,$weeks);
+        $result .= $this->separator($size, $weeks);
         return $result;
     }
 
@@ -392,7 +392,7 @@ class DefaultController extends Controller {
                         $newStatus = "OFFICE";
                         $office[$i % 7] ++;
                     }
-                } else {
+                } else if (!$foundPeriod) {
                     $newStatus = "-";
                 }
                 if ((true || $today < $i - 1 || $today >= $i + 1) && ($status == "" || $newStatus == $status)) {
@@ -446,14 +446,14 @@ class DefaultController extends Controller {
             $response .= "\n";
         }
         if (count($userList) > 1 && $options['mode'] == 'full') {
-            $response .= $this->separator($cellSize,$weeks);
+            $response .= $this->separator($cellSize, $weeks);
             $response .= "| OFFICE --> |";
             for ($i = 0; $i < 5; $i++) {
                 $response .= " " . sprintf(" %2d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
             }
             $response .= "\n";
         }
-        $response .= $this->separator($cellSize,$weeks) . "```\n";
+        $response .= $this->separator($cellSize, $weeks) . "```\n";
 
         return $response;
     }
