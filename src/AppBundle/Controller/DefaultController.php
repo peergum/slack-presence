@@ -11,19 +11,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class DefaultController extends Controller
-{
+class DefaultController extends Controller {
 
-    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     /**
      * @Route("/", name="homepage")
      */
-    public function indexAction(Request $request)
-    {
+    public function indexAction(Request $request) {
         // replace this example code with whatever you need
-        return $this->render('default/index.html.twig',
-                        [
+        return $this->render('default/index.html.twig', [
                     'base_dir' => realpath($this->container->getParameter('kernel.root_dir') . '/..'),
         ]);
     }
@@ -31,8 +28,7 @@ class DefaultController extends Controller
     /**
      * @Route("/slack", name="slack")
      */
-    public function slackAction(Request $request)
-    {
+    public function slackAction(Request $request) {
         if ($request->getMethod() == 'GET') {
             $args = $request->query->all();
         } else {
@@ -57,7 +53,7 @@ class DefaultController extends Controller
         $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
-        if (preg_match_all('/([a-z]+(?:[0-9]+(?: ?- ?[a-z]+[0-9]+)?)?)/', $text, $matches) > 0) {
+        if (preg_match_all('/([0-9]*[a-z]+(?:[0-9]+(?: ?- ?[a-z]+[0-9]+)?)?)/', $text, $matches) > 0) {
             switch ($matches[1][0]) {
                 case 'home':
                 case 'office':
@@ -77,7 +73,10 @@ class DefaultController extends Controller
                     $response = $this->people();
                     break;
                 case 'compact':
-                    $response = $this->people(null, "compact");
+                    $response = $this->people(null, [ 'mode' => "compact"]);
+                    break;
+                case '2weeks':
+                    $response = $this->people(null, [ 'size' => "2weeks"]);
                     break;
                 default:
                     $response = "```\n"
@@ -114,10 +113,9 @@ class DefaultController extends Controller
      * @param array $args
      * @return string
      */
-    private function getPeriod(&$user, $values)
-    {
+    private function getPeriod(&$user, $values) {
         $response = '';
-        $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         $days = false;
         $today = date("N") - 1;
@@ -135,13 +133,12 @@ class DefaultController extends Controller
                 $start->add($interval);
                 $stop = clone($start);
                 $stop->setTime(23, 59, 59);
-            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+)(?: ?- ?([a-z]+)([0-9]+))?/',
-                            $values[$i], $dates) > 0) {
+            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+)(?: ?- ?([a-z]+)([0-9]+))?/', $values[$i], $dates) > 0) {
                 $startMonth = array_search(substr($dates[1], 0, 3), $months);
                 $startDay = $dates[2];
-                if (count($dates)<4) {
-                    $dates[3]=$dates[1];
-                    $dates[4]=$dates[2];
+                if (count($dates) < 4) {
+                    $dates[3] = $dates[1];
+                    $dates[4] = $dates[2];
                 }
                 $stopMonth = array_search(substr($dates[3], 0, 3), $months);
                 $stopDay = $dates[4];
@@ -234,8 +231,7 @@ class DefaultController extends Controller
         return $response;
     }
 
-    private function setDays($presence, $values)
-    {
+    private function setDays($presence, $values) {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $newPresence = $presence;
         $days = false;
@@ -267,11 +263,12 @@ class DefaultController extends Controller
      * @param type $size
      * @return string
      */
-    private function separator($size)
-    {
+    private function separator($size, $weeks) {
         $result = '+------------+';
-        foreach ($this->weekDays as $day) {
-            $result .= str_repeat('-', $size + 2) . '+';
+        for ($i = 0; $i < $weeks; $i++) {
+            foreach ($this->weekDays as $day) {
+                $result .= str_repeat('-', $size + 2) . '+';
+            }
         }
         $result .= "\n";
         return $result;
@@ -282,25 +279,26 @@ class DefaultController extends Controller
      * @param type $size
      * @return string
      */
-    private function getHeader($size)
-    {
+    private function getHeader($size,$weeks) {
         $today = date("N") - 1;
         $weekStart = $this->getWeekStart($today);
         $currentDay = clone($weekStart);
-        $result = $this->separator($size);
+        $result = $this->separator($size,$weeks);
         $result .= '| Person     |';
-        foreach ($this->weekDays as $i => $day) {
-            $theDay = substr($day, 0, $size > 3 ? $size - 3 : $size);
-            if ($size > 3) {
-                $theDay .= $currentDay->format(" d");
+        for ($i = 0; $i < $weeks; $i++) {
+            foreach ($this->weekDays as $day) {
+                $theDay = substr($day, 0, $size > 3 ? $size - 3 : $size);
+                if ($size > 3) {
+                    $theDay .= $currentDay->format(" d");
+                }
+                $start = floor(($size - strlen($theDay)) / 2);
+                $end = $size - $start - strlen($theDay);
+                $result .= " " . str_repeat(" ", $start) . $theDay . str_repeat(" ", $end) . " |";
+                $currentDay->add(new DateInterval("P1D"));
             }
-            $start = floor(($size - strlen($theDay)) / 2);
-            $end = $size - $start - strlen($theDay);
-            $result .= " " . str_repeat(" ", $start) . $theDay . str_repeat(" ", $end) . " |";
-            $currentDay->add(new DateInterval("P1D"));
         }
         $result .= "\n";
-        $result .= $this->separator($size);
+        $result .= $this->separator($size,$weeks);
         return $result;
     }
 
@@ -309,8 +307,7 @@ class DefaultController extends Controller
      * @param int $today
      * @return DateTime
      */
-    private function getWeekStart($today)
-    {
+    private function getWeekStart($today) {
         $weekStart = new DateTime();
         $weekStart->setTime(0, 0, 0);
         if ($today > 4) {
@@ -325,13 +322,31 @@ class DefaultController extends Controller
      * @param User|null $user
      * @return string
      */
-    private function people($user = null, $mode = 'full')
-    {
-        $cellSize = $mode == 'full' ? 9 : 1;
+    private function people($user = null, array $options = []) {
+        $options = array_merge([
+            'mode' => 'full',
+            'size' => 'week',
+                ], $options);
+        $cellSize = $options['mode'] == 'full' ? 9 : 1;
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
         $holidayRepository = $this->getDoctrine()->getRepository('AppBundle:Holiday');
 
-        $response = "```\n" . $this->getHeader($cellSize);
+        switch ($options['size']) {
+            case 'week':
+                $weeks = 1;
+                break;
+            case '2weeks':
+                $weeks = 2;
+                break;
+            case 'month':
+                $weeks = 4;
+                break;
+            default:
+                $weeks = 1;
+                break;
+        }
+
+        $response = "```\n" . $this->getHeader($cellSize, $weeks);
         $userList = $user ? [ $user] : $userRepository->findBy([], ['name' => 'ASC']);
         $users = 0;
 
@@ -343,9 +358,9 @@ class DefaultController extends Controller
             $day = clone($weekStart);
             $status = "";
             $days = 0;
-            for ($i = 0; $i < 5; $i++) {
+            for ($i = 0; $i < 7 * $weeks; $i++) {
                 if (!isset($office[$i])) {
-                    $office[$i] = 0;
+                    $office[$i % 7] = 0;
                 }
                 $holiday = $holidayRepository->findOneBy([
                     'date' => $day,
@@ -364,13 +379,15 @@ class DefaultController extends Controller
                         }
                     }
                 }
-                if (!$foundPeriod) {
+                if (!$foundPeriod && $i % 7 < 5) {
                     if (pow(2, $i) & $user->getPresence()) {
                         $newStatus = "HOME";
                     } else {
                         $newStatus = "OFFICE";
-                        $office[$i] ++;
+                        $office[$i % 7] ++;
                     }
+                } else {
+                    $newStatus = "-";
                 }
                 if ((true || $today < $i - 1 || $today >= $i + 1) && ($status == "" || $newStatus == $status)) {
                     $days++;
@@ -379,7 +396,7 @@ class DefaultController extends Controller
                     $size = ($cellSize + 3) * $days - 1;
                     $start = floor(($size - strlen($showStatus)) / 2);
                     $end = $size - strlen($showStatus) - $start;
-                    if ($days == 1) {
+                    if ($days == 1 || $status == "-") {
                         $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     } else {
                         $response .= substr(" <" . str_repeat("-", $start) . " ", 0, $start - 1)
@@ -398,7 +415,7 @@ class DefaultController extends Controller
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
                 $end = $size - strlen($showStatus) - $start;
-                if ($days == 1) {
+                if ($days == 1 || $status == "-") {
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                 } else {
                     $response .= substr(" <" . str_repeat("-", $start) . " ", 0, $start - 1)
@@ -408,7 +425,7 @@ class DefaultController extends Controller
                             . substr(" " . str_repeat("-", $end) . "> ", -$end + 1, $end - 1) . "|";
                 }
             }
-            if ($mode == 'full') {
+            if ($options['mode'] == 'full') {
                 $day = clone($weekStart);
                 $day->add(new DateInterval("P1W"));
                 foreach ($user->getPeriods() as $period) {
@@ -422,29 +439,27 @@ class DefaultController extends Controller
 
             $response .= "\n";
         }
-        if (count($userList) > 1 && $mode == 'full') {
-            $response .= $this->separator($cellSize);
+        if (count($userList) > 1 && $options['mode'] == 'full') {
+            $response .= $this->separator($cellSize,$weeks);
             $response .= "| OFFICE --> |";
             for ($i = 0; $i < 5; $i++) {
                 $response .= " " . sprintf(" %2d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
             }
             $response .= "\n";
         }
-        $response .= $this->separator($cellSize) . "```\n";
+        $response .= $this->separator($cellSize,$weeks) . "```\n";
 
         return $response;
     }
 
-    private function showUpdate(User $user)
-    {
+    private function showUpdate(User $user) {
         $response = $user->getName() . " updated his/her weekly presence:\n";
         $response .= $this->people($user, "full");
         $payload = json_encode([
             "text" => $response,
         ]);
         $curl = curl_init($this->getParameter("slack_post_url"));
-        curl_setopt_array($curl,
-                [
+        curl_setopt_array($curl, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => [
                 'payload' => $payload,
