@@ -266,7 +266,10 @@ class DefaultController extends Controller {
     private function separator($size, $weeks) {
         $result = '+------------+';
         for ($i = 0; $i < $weeks; $i++) {
-            foreach ($this->weekDays as $day) {
+            foreach ($this->weekDays as $j => $day) {
+                if ($weeks == 1 && $j > 4) {
+                    continue;
+                }
                 $result .= str_repeat('-', $size + 2) . '+';
             }
         }
@@ -286,7 +289,10 @@ class DefaultController extends Controller {
         $result = $this->separator($size,$weeks);
         $result .= '| Person     |';
         for ($i = 0; $i < $weeks; $i++) {
-            foreach ($this->weekDays as $day) {
+            foreach ($this->weekDays as $j => $day) {
+                if ($weeks == 1 && $j > 4) {
+                    continue;
+                }
                 $theDay = substr($day, 0, $size > 3 ? $size - 3 : $size);
                 if ($size > 3) {
                     $theDay .= $currentDay->format(" d");
@@ -358,7 +364,7 @@ class DefaultController extends Controller {
             $day = clone($weekStart);
             $status = "";
             $days = 0;
-            for ($i = 0; $i < 7 * $weeks; $i++) {
+            for ($i = 0; $i < 7 * $weeks - 2 * ($weeks == 1); $i++) {
                 if (!isset($office[$i])) {
                     $office[$i % 7] = 0;
                 }
