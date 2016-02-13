@@ -76,7 +76,10 @@ class DefaultController extends Controller {
                     $response = $this->people(null, [ 'mode' => "compact"]);
                     break;
                 case '2weeks':
-                    $response = $this->people(null, [ 'size' => "2weeks"]);
+                    $response = $this->people(null, [ 'mode' => 'compact', 'size' => "2weeks"]);
+                    break;
+                case 'month':
+                    $response = $this->people(null, [ 'mode' => 'compact', 'size' => "month"]);
                     break;
                 default:
                     $response = "```\n"
