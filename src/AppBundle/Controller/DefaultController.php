@@ -82,17 +82,22 @@ class DefaultController extends Controller {
                     $response = $this->people(null, [ 'mode' => 'compact', 'size' => "month"]);
                     break;
                 default:
-                    $response = "```\n"
-                            . "Help:\n"
-                            . "- Set your home/office/sick/away days:\n"
-                            . "  home|office: [mon|tue|wed|thu|fri] ..\n"
-                            . "  set <event>: [mon|tue|wed|thu|fri|xxx99|xxx99-xxx99] ..\n"
-                            . "  (use same command to undo/change)"
-                            . "  (no day or period means today)\n"
-                            . "- See everyone's presence:\n"
-                            . "  people (use compact on cell)\n"
-                            . "\nNote: outside the #presence channel, use /presence before your command\n"
-                            . "```\n";
+                    $response = "Quick Help:\n"
+                        . "- *Regular schedule* (home/office)\n"
+                        . "  Set your home or office days:\n"
+                        . "     `home|office [mon|tue|wed|thu|fri] ..`\n"
+                        . "  (if no weekday informed, current weekday is used)\n"
+                        . "- *Special Schedule* (one-time change home/office or\n"
+                        . "  other events):\n"
+                        . "     `set <event_name>: [mon|tue|wed|thu|fri|xxx99|xxx99-xxx99] ..`\n"
+                        . "  (re-run same command to undo/change)\n"
+                        . "- *Consultations*\n"
+                        . "     `people` (current week, with days/dates)\n"
+                        . "     `compact` (same, 1 char columns)\n"
+                        . "     `2weeks` (current and next week + weekends, compact)\n"
+                        . "     `month` (one month from this week on, compact)\n"
+                        . "- *Note*\n"
+                        . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n";
                     break;
             }
         } else {
