@@ -47,6 +47,7 @@ class DefaultController extends Controller {
             $user = new User();
             $user->setUser($args['user_id']);
             $user->setName($args['user_name']);
+            $user->setLocation('ca');
             $user->setPresence(0);
         }
 
