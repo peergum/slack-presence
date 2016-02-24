@@ -1,0 +1,27 @@
+AppBundle\Entity\Team:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\TeamRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    indexes:
+        name:
+            columns: [ name ]
+
+    fields:
+        name:
+            type: string
+            length: 255
+
+    oneToMany:
+        users:
+            orderBy: { 'name': 'ASC' }
+            targetEntity: User
+            mappedBy: team
+            cascade: [ ]
+
+    lifecycleCallbacks: {  }

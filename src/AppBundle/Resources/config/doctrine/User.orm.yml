@@ -15,7 +15,9 @@ AppBundle\Entity\User:
             columns: [ user ]
         location:
             columns: [ location ]
-            
+        birthday:
+            columns: [ birthday ]
+
     fields:
         name:
             type: string
@@ -29,6 +31,9 @@ AppBundle\Entity\User:
         location:
             type: string
             length: 2
+        birthday:
+            type: date
+            nullable: true
 
     oneToMany:
         periods:
@@ -36,4 +41,14 @@ AppBundle\Entity\User:
             targetEntity: Period
             mappedBy: user
             cascade: [ ALL ]
+
+    manyToOne:
+        team:
+            targetEntity: Team
+            inversedBy: users
+            joinColumn:
+              name: team_id
+              referencedColumnName: id
+            onDelete: SET NULL
+
     lifecycleCallbacks: {  }
