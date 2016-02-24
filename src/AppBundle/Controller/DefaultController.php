@@ -75,7 +75,10 @@ class DefaultController extends Controller {
                 case 'people':
                 case 'list':
                 case 'show':
-                    $response = $this->people();
+                    $response = $this->people(null, [
+                        'mode' => 'full',
+                        'team' => true,
+                        ]);
                     break;
                 case 'compact':
                     $response = $this->people(null, [ 'mode' => "compact"]);
@@ -347,9 +350,11 @@ class DefaultController extends Controller {
         $options = array_merge([
             'mode' => 'full',
             'size' => 'week',
+            'team' => false,
                 ], $options);
         $cellSize = $options['mode'] == 'full' ? 9 : 1;
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
+        $teamRepository = $this->getDoctrine()->getRepository('AppBundle:Team');
         $holidayRepository = $this->getDoctrine()->getRepository('AppBundle:Holiday');
 
         switch ($options['size']) {
@@ -368,12 +373,26 @@ class DefaultController extends Controller {
         }
 
         $response = "```\n" . $this->getHeader($cellSize, $weeks);
-        $userList = $user ? [ $user] : $userRepository->findBy([], ['name' => 'ASC']);
+        if ($options['team']) {
+            $users = [];
+            $teams = $teamRepository->findBy([],['name'=>'ASC']);
+            foreach ($teams as $team) {
+                $users = array_merge($users,$team->getUsers()->toArray());
+            }
+        } else {
+            $users = $userRepository->findBy([], ['name' => 'ASC']);
+        }
+        $userList = $user ? [ $user] : $users ;
         $users = 0;
 
         $today = date("N") - 1;
         $weekStart = $this->getWeekStart($today);
+        $team = "";
         foreach ($userList as $user) {
+            if ($team && $team !== $user->getTeam()->getName()) {
+                $response .= $this->separator($cellSize, $weeks);
+            }
+            $team = $user->getTeam()->getName();
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             $day = clone($weekStart);
