@@ -77,17 +77,28 @@ class DefaultController extends Controller {
                 case 'show':
                     $response = $this->people(null, [
                         'mode' => 'full',
-                        'team' => true,
+                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
                         ]);
                     break;
                 case 'compact':
-                    $response = $this->people(null, [ 'mode' => "compact"]);
+                    $response = $this->people(null, [
+                        'mode' => "compact",
+                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        ]);
                     break;
                 case '2weeks':
-                    $response = $this->people(null, [ 'mode' => 'compact', 'size' => "2weeks"]);
+                    $response = $this->people(null, [
+                        'mode' => 'compact',
+                        'size' => "2weeks",
+                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        ]);
                     break;
                 case 'month':
-                    $response = $this->people(null, [ 'mode' => 'compact', 'size' => "month"]);
+                    $response = $this->people(null, [
+                        'mode' => 'compact',
+                        'size' => "month",
+                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        ]);
                     break;
                 default:
                     $response = "Quick Help:\n"
