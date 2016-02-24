@@ -309,16 +309,15 @@ class DefaultController extends Controller
      * @param type $size
      * @return string
      */
-    private function separator($size, $weeks, $char = '-')
+    private function separator($size, $weeks, $char = '=')
     {
-        $result = '+------------+';
+        $result = '+' . str_repeat($char,12). '+';
         for ($i = 0; $i < $weeks; $i++) {
             foreach ($this->weekDays as $j => $day) {
                 if ($weeks == 1 && $j > 4) {
                     continue;
                 }
-                $result .= str_repeat($char, $size + 2)
-                        . ($i < $weeks - 1 ? $char : '+');
+                $result .= str_repeat($char, $size + 2) . '+';
             }
         }
         $result .= "\n";
@@ -423,7 +422,7 @@ class DefaultController extends Controller
         $team = "";
         foreach ($userList as $user) {
             if ($options['team'] && $team && $team !== $user->getTeam()->getName()) {
-                $response .= $this->separator($cellSize, $weeks, ' ');
+                $response .= $this->separator($cellSize, $weeks, '-');
             }
             $team = $user->getTeam()->getName();
             $users++;
