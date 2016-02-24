@@ -389,7 +389,7 @@ class DefaultController extends Controller {
         $weekStart = $this->getWeekStart($today);
         $team = "";
         foreach ($userList as $user) {
-            if ($team && $team !== $user->getTeam()->getName()) {
+            if ($options['team'] && $team && $team !== $user->getTeam()->getName()) {
                 $response .= $this->separator($cellSize, $weeks);
             }
             $team = $user->getTeam()->getName();
