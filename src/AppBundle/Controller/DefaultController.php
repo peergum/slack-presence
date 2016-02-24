@@ -422,7 +422,7 @@ class DefaultController extends Controller
         $team = "";
         foreach ($userList as $user) {
             if ($options['team'] && $team && $team !== $user->getTeam()->getName()) {
-                $response .= $this->separator($cellSize, $weeks, '-');
+                $response .= $this->separator($cellSize, $weeks, '=');
             }
             $team = $user->getTeam()->getName();
             $users++;
