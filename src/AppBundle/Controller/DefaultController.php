@@ -11,18 +11,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class DefaultController extends Controller {
+class DefaultController extends Controller
+{
 
     private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
     private $mute = false;
 
     /**
      * @Route("/", name="homepage")
      */
-    public function indexAction(Request $request) {
+    public function indexAction(Request $request)
+    {
         // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', [
+        return $this->render('default/index.html.twig',
+                        [
                     'base_dir' => realpath($this->container->getParameter('kernel.root_dir') . '/..'),
         ]);
     }
@@ -30,7 +32,8 @@ class DefaultController extends Controller {
     /**
      * @Route("/slack", name="slack")
      */
-    public function slackAction(Request $request) {
+    public function slackAction(Request $request)
+    {
         if ($request->getMethod() == 'GET') {
             $args = $request->query->all();
         } else {
@@ -72,51 +75,62 @@ class DefaultController extends Controller {
                     if ($request->getMethod() !== 'GET' && !$this->mute) {
                         $this->showUpdate($user);
                     }
+                case 'team':
+                    $response = $this->people(null,
+                            [
+                        'mode' => 'full',
+                        'team' => true,
+                    ]);
+                    break;
                 case 'people':
                 case 'list':
                 case 'show':
-                    $response = $this->people(null, [
+                    $response = $this->people(null,
+                            [
                         'mode' => 'full',
                         'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
-                        ]);
+                    ]);
                     break;
                 case 'compact':
-                    $response = $this->people(null, [
+                    $response = $this->people(null,
+                            [
                         'mode' => "compact",
                         'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
-                        ]);
+                    ]);
                     break;
                 case '2weeks':
-                    $response = $this->people(null, [
+                    $response = $this->people(null,
+                            [
                         'mode' => 'compact',
                         'size' => "2weeks",
                         'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
-                        ]);
+                    ]);
                     break;
                 case 'month':
-                    $response = $this->people(null, [
+                    $response = $this->people(null,
+                            [
                         'mode' => 'compact',
                         'size' => "month",
                         'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
-                        ]);
+                    ]);
                     break;
                 default:
                     $response = "Quick Help:\n"
-                        . "- *Regular schedule* (home/office)\n"
-                        . "  Set your home or office days:\n"
-                        . "     `home|office [mon|tue|wed|thu|fri] ..`\n"
-                        . "  (if no weekday informed, current weekday is used)\n"
-                        . "- *Special Schedule* (one-time change home/office or\n"
-                        . "  other events):\n"
-                        . "     `set <event_name>: [mon|tue|wed|thu|fri|xxx99|xxx99-xxx99] ..`\n"
-                        . "  (re-run same command to undo/change)\n"
-                        . "- *Consultations*\n"
-                        . "     `people` (current week, with days/dates)\n"
-                        . "     `compact` (same, 1 char columns)\n"
-                        . "     `2weeks` (current and next week + weekends, compact)\n"
-                        . "     `month` (one month from this week on, compact)\n"
-                        . "- *Note*\n"
-                        . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n";
+                            . "- *Regular schedule* (home/office)\n"
+                            . "  Set your home or office days:\n"
+                            . "     `home|office [mon|tue|wed|thu|fri] ..`\n"
+                            . "  (if no weekday informed, current weekday is used)\n"
+                            . "- *Special Schedule* (one-time change home/office or\n"
+                            . "  other events):\n"
+                            . "     `set <event_name>: [mon|tue|wed|thu|fri|xxx99|xxx99-xxx99] ..`\n"
+                            . "  (re-run same command to undo/change)\n"
+                            . "- *Consultations*\n"
+                            . "     `people` (current week, with days/dates)\n"
+                            . "     `compact` (same, 1 char columns)\n"
+                            . "     `2weeks` (current and next week + weekends, compact)\n"
+                            . "     `month` (one month from this week on, compact)\n"
+                            . "- *Note*\n"
+                            . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n";
                     break;
             }
         } else {
@@ -140,7 +154,8 @@ class DefaultController extends Controller {
      * @param array $args
      * @return string
      */
-    private function getPeriod(&$user, $values) {
+    private function getPeriod(&$user, $values)
+    {
         $response = '';
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -160,7 +175,8 @@ class DefaultController extends Controller {
                 $start->add($interval);
                 $stop = clone($start);
                 $stop->setTime(23, 59, 59);
-            } else if ($pos === false && preg_match('/([a-z]+) *([0-9]+)(?: *- *([a-z]+) *([0-9]+))?/', $values[$i], $dates) > 0) {
+            } else if ($pos === false && preg_match('/([a-z]+) *([0-9]+)(?: *- *([a-z]+) *([0-9]+))?/',
+                            $values[$i], $dates) > 0) {
                 $startMonth = array_search(substr($dates[1], 0, 3), $months);
                 $startDay = $dates[2];
                 if (count($dates) < 4) {
@@ -260,7 +276,8 @@ class DefaultController extends Controller {
         return $response;
     }
 
-    private function setDays($presence, $values) {
+    private function setDays($presence, $values)
+    {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
         $newPresence = $presence;
         $days = false;
@@ -292,14 +309,15 @@ class DefaultController extends Controller {
      * @param type $size
      * @return string
      */
-    private function separator($size, $weeks) {
+    private function separator($size, $weeks, $char = '-')
+    {
         $result = '+------------+';
         for ($i = 0; $i < $weeks; $i++) {
             foreach ($this->weekDays as $j => $day) {
                 if ($weeks == 1 && $j > 4) {
                     continue;
                 }
-                $result .= str_repeat('-', $size + 2) . '+';
+                $result .= str_repeat($char, $size + 2) . '+';
             }
         }
         $result .= "\n";
@@ -311,7 +329,8 @@ class DefaultController extends Controller {
      * @param type $size
      * @return string
      */
-    private function getHeader($size, $weeks) {
+    private function getHeader($size, $weeks)
+    {
         $today = date("N") - 1;
         $weekStart = $this->getWeekStart($today);
         $currentDay = clone($weekStart);
@@ -342,7 +361,8 @@ class DefaultController extends Controller {
      * @param int $today
      * @return DateTime
      */
-    private function getWeekStart($today) {
+    private function getWeekStart($today)
+    {
         $weekStart = new DateTime();
         $weekStart->setTime(0, 0, 0);
         if ($today > 4) {
@@ -357,7 +377,8 @@ class DefaultController extends Controller {
      * @param User|null $user
      * @return string
      */
-    private function people($user = null, array $options = []) {
+    private function people($user = null, array $options = [])
+    {
         $options = array_merge([
             'mode' => 'full',
             'size' => 'week',
@@ -386,14 +407,14 @@ class DefaultController extends Controller {
         $response = "```\n" . $this->getHeader($cellSize, $weeks);
         if ($options['team']) {
             $users = [];
-            $teams = $teamRepository->findBy([],['name'=>'ASC']);
+            $teams = $teamRepository->findBy([], ['name' => 'ASC']);
             foreach ($teams as $team) {
-                $users = array_merge($users,$team->getUsers()->toArray());
+                $users = array_merge($users, $team->getUsers()->toArray());
             }
         } else {
             $users = $userRepository->findBy([], ['name' => 'ASC']);
         }
-        $userList = $user ? [ $user] : $users ;
+        $userList = $user ? [ $user] : $users;
         $users = 0;
 
         $today = date("N") - 1;
@@ -401,7 +422,7 @@ class DefaultController extends Controller {
         $team = "";
         foreach ($userList as $user) {
             if ($options['team'] && $team && $team !== $user->getTeam()->getName()) {
-                $response .= $this->separator($cellSize, $weeks);
+                $response .= $this->separator($cellSize, $weeks, ' ');
             }
             $team = $user->getTeam()->getName();
             $users++;
@@ -503,14 +524,16 @@ class DefaultController extends Controller {
         return $response;
     }
 
-    private function showUpdate(User $user) {
+    private function showUpdate(User $user)
+    {
         $response = $user->getName() . " updated his/her weekly presence:\n";
-        $response .= $this->people($user, [ 'mode' => "full" ]);
+        $response .= $this->people($user, [ 'mode' => "full"]);
         $payload = json_encode([
             "text" => $response,
         ]);
         $curl = curl_init($this->getParameter("slack_post_url"));
-        curl_setopt_array($curl, [
+        curl_setopt_array($curl,
+                [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => [
                 'payload' => $payload,
