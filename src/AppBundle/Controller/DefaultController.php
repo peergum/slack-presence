@@ -15,6 +15,8 @@ class DefaultController extends Controller {
 
     private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+    private $mute = false;
+
     /**
      * @Route("/", name="homepage")
      */
@@ -54,18 +56,20 @@ class DefaultController extends Controller {
         $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
-        if (preg_match_all('/([0-9]*[a-z]+(?:[0-9]+(?: ?- ?[a-z]+[0-9]+)?)?)/', $text, $matches) > 0) {
+        if (preg_match_all('/([0-9]*[a-z]+(?: *[0-9]+(?: *- *[a-z]+ *[0-9]+)?)?)/', $text, $matches) > 0) {
             switch ($matches[1][0]) {
                 case 'home':
                 case 'office':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[1]));
                     $response .= $this->people();
-                    $this->showUpdate($user);
+                    if (!$this->mute) {
+                        $this->showUpdate($user);
+                    }
                     break;
                 case 'set':
                     $response .= $this->getPeriod($user, $matches[1]);
                     $response .= $this->people();
-                    if ($request->getMethod() !== 'GET') {
+                    if ($request->getMethod() !== 'GET' && !$this->mute) {
                         $this->showUpdate($user);
                     }
                 case 'people':
@@ -142,7 +146,7 @@ class DefaultController extends Controller {
                 $start->add($interval);
                 $stop = clone($start);
                 $stop->setTime(23, 59, 59);
-            } else if ($pos === false && preg_match('/([a-z]+)([0-9]+)(?: ?- ?([a-z]+)([0-9]+))?/', $values[$i], $dates) > 0) {
+            } else if ($pos === false && preg_match('/([a-z]+) *([0-9]+)(?: *- *([a-z]+) *([0-9]+))?/', $values[$i], $dates) > 0) {
                 $startMonth = array_search(substr($dates[1], 0, 3), $months);
                 $startDay = $dates[2];
                 if (count($dates) < 4) {
@@ -162,6 +166,8 @@ class DefaultController extends Controller {
                 $stop = new Datetime();
                 $stop->setDate($year, $stopMonth + 1, $stopDay);
                 $stop->setTime(23, 59, 59);
+            } else if ($values[$i] == "mute") {
+                $this->mute = true;
             } else {
                 $response .= "Note: [" . $values[$i] . "] -> what do you mean?\n";
                 continue;
