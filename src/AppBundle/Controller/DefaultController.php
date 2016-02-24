@@ -317,7 +317,8 @@ class DefaultController extends Controller
                 if ($weeks == 1 && $j > 4) {
                     continue;
                 }
-                $result .= str_repeat($char, $size + 2) . '+';
+                $result .= str_repeat($char, $size + 2)
+                        . ($i < $weeks - 1 ? $char : '+');
             }
         }
         $result .= "\n";
