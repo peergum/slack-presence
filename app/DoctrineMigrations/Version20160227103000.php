@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-class Version20160206114809 extends AbstractMigration
+class Version20160227103000 extends AbstractMigration
 {
     /**
      * @param Schema $schema
@@ -18,8 +18,8 @@ class Version20160206114809 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE holiday ADD name VARCHAR(20) NOT NULL');
-        $this->addSql('CREATE INDEX name ON holiday (name)');
+        $this->addSql('ALTER TABLE team ADD position INT NOT NULL');
+        $this->addSql('CREATE INDEX position ON team (position)');
     }
 
     /**
@@ -30,7 +30,7 @@ class Version20160206114809 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('DROP INDEX name ON holiday');
-        $this->addSql('ALTER TABLE holiday DROP name');
+        $this->addSql('DROP INDEX position ON team');
+        $this->addSql('ALTER TABLE team DROP position');
     }
 }

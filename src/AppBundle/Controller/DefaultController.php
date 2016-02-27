@@ -407,7 +407,7 @@ class DefaultController extends Controller
         $response = "```\n" . $this->getHeader($cellSize, $weeks);
         if ($options['team']) {
             $users = [];
-            $teams = $teamRepository->findBy([], ['name' => 'ASC']);
+            $teams = $teamRepository->findBy([], ['position' => 'ASC']);
             foreach ($teams as $team) {
                 $users = array_merge($users, $team->getUsers()->toArray());
             }

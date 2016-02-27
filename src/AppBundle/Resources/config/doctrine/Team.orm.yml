@@ -11,11 +11,16 @@ AppBundle\Entity\Team:
     indexes:
         name:
             columns: [ name ]
+        position:
+            columns: [ position ]
 
     fields:
         name:
             type: string
             length: 255
+        position:
+            type: integer
+            default: 0
 
     oneToMany:
         users:
