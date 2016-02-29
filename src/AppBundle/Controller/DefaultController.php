@@ -17,6 +17,9 @@ class DefaultController extends Controller
     private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     private $mute = false;
 
+    const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+) *([0-9]+)?)?/',
+            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+(( *[0-9]+)?( *- *[a-z]+( *[0-9]+)?)?)?)/';
+
     /**
      * @Route("/", name="homepage")
      */
@@ -59,7 +62,7 @@ class DefaultController extends Controller
         $response = "All set, " . $args['user_name'] . "\n";
 
         $text = strtolower($args['text']);
-        if (preg_match_all('/([0-9]*[a-z]+(?: *[0-9]+(?: *- *[a-z]+ *[0-9]+)?)?)/', $text, $matches) > 0) {
+        if (preg_match_all(self::CMD_PERIOD_REGEX, $text, $matches) > 0) {
             switch ($matches[1][0]) {
                 case 'home':
                 case 'office':
@@ -71,15 +74,18 @@ class DefaultController extends Controller
                     break;
                 case 'set':
                     $response .= $this->getPeriod($user, $matches[1]);
-                    $response .= $this->people();
+                    $response .= $this->people($user,[
+                        'mode' => 'full',
+                    ]);
                     if ($request->getMethod() !== 'GET' && !$this->mute) {
                         $this->showUpdate($user);
                     }
-                case 'team':
+                    break;
+                case 'teams':
                     $response = $this->people(null,
                             [
                         'mode' => 'full',
-                        'team' => true,
+                        'teams' => true,
                     ]);
                     break;
                 case 'people':
@@ -88,14 +94,14 @@ class DefaultController extends Controller
                     $response = $this->people(null,
                             [
                         'mode' => 'full',
-                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
                     ]);
                     break;
                 case 'compact':
                     $response = $this->people(null,
                             [
                         'mode' => "compact",
-                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
                     ]);
                     break;
                 case '2weeks':
@@ -103,7 +109,7 @@ class DefaultController extends Controller
                             [
                         'mode' => 'compact',
                         'size' => "2weeks",
-                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
                     ]);
                     break;
                 case 'month':
@@ -111,7 +117,7 @@ class DefaultController extends Controller
                             [
                         'mode' => 'compact',
                         'size' => "month",
-                        'team' => isset($matches[1][1]) && $matches[1][1] == 'team',
+                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
                     ]);
                     break;
                 default:
@@ -125,10 +131,11 @@ class DefaultController extends Controller
                             . "     `set <event_name>: [mon|tue|wed|thu|fri|xxx99|xxx99-xxx99] ..`\n"
                             . "  (re-run same command to undo/change)\n"
                             . "- *Consultations*\n"
-                            . "     `people` (current week, with days/dates)\n"
-                            . "     `compact` (same, 1 char columns)\n"
-                            . "     `2weeks` (current and next week + weekends, compact)\n"
-                            . "     `month` (one month from this week on, compact)\n"
+                            . "     `people [teams]` (current week, with days/dates)\n"
+                            . "     `compact [teams]` (same, 1 char columns)\n"
+                            . "     `2weeks [teams]` (current and next week + weekends, compact)\n"
+                            . "     `month [teams]` (one month from this week on, compact)\n"
+                            . "     `teams` (same as `people teams`)\n"
                             . "- *Note*\n"
                             . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n";
                     break;
@@ -163,44 +170,68 @@ class DefaultController extends Controller
         $today = date("N") - 1;
         array_shift($values);
         for ($i = 1; $i < count($values); $i++) {
-            $pos = array_search(substr($values[$i], 0, 3), $weekDays);
-            if ($pos !== false && $pos < $today) {
-                $response .= "Note: [" . $values[$i] . "] -> you cannot change days before today this week\n";
+            if (preg_match(self::PERIOD_REGEX, $values[$i], $dates) == 0) {
+                $response .= "Note: [" . $values[$i] . "] -> what do you mean?\n";
                 continue;
             }
+            $start = null;
+            $stop = null;
+            $pos = array_search(substr($dates[1], 0, 3), $weekDays);
             if ($pos !== false) {
+                If ($pos < $today) {
+                    $pos+=7;
+                }
                 $start = new DateTime();
                 $start->setTime(0, 0, 0);
                 $interval = new DateInterval("P" . ($pos - $today) . "D");
                 $start->add($interval);
-                $stop = clone($start);
-                $stop->setTime(23, 59, 59);
-            } else if ($pos === false && preg_match('/([a-z]+) *([0-9]+)(?: *- *([a-z]+) *([0-9]+))?/',
-                            $values[$i], $dates) > 0) {
-                $startMonth = array_search(substr($dates[1], 0, 3), $months);
+                $datePosition = 3;
+            } else if (($startMonth = array_search(substr($dates[1], 0, 3), $months)) !== false) {
                 $startDay = $dates[2];
-                if (count($dates) < 4) {
-                    $dates[3] = $dates[1];
-                    $dates[4] = $dates[2];
-                }
-                $stopMonth = array_search(substr($dates[3], 0, 3), $months);
-                $stopDay = $dates[4];
-                if ($startMonth === false || $stopMonth === false || !$startDay || $startDay > 31 || !$stopDay || $stopDay > 31) {
-                    $response .= "Note: [" . $values[$i] . "] -> I don't get it...\n";
+                if (!$startDay || $startDay > 31) {
+                    $response .= "Wrong start date: [" . $dates[1] . " " . $dates[2] . "]\n";
                     continue;
                 }
                 $year = date("Y");
                 $start = new Datetime();
                 $start->setDate($year, $startMonth + 1, $startDay);
                 $start->setTime(0, 0, 0);
-                $stop = new Datetime();
-                $stop->setDate($year, $stopMonth + 1, $stopDay);
-                $stop->setTime(23, 59, 59);
-            } else if ($values[$i] == "mute") {
+                $datePosition = 3;
+            } else if ($dates[1] == "mute") {
                 $this->mute = true;
-            } else {
-                $response .= "Note: [" . $values[$i] . "] -> what do you mean?\n";
                 continue;
+            } else {
+                $response .= "What do you mean by [" . $dates[1] . "]...?";
+                continue;
+            }
+            if (count($dates) > $datePosition) {
+                $pos2 = array_search(substr($dates[$datePosition], 0, 3), $weekDays);
+                if ($pos2 !== false) {
+                    while ($pos2 <= $pos) {
+                        $pos2+=7;
+                    }
+                    $stop = new DateTime();
+                    $stop->setTime(23, 59, 59);
+                    $interval = new DateInterval("P" . ($pos2 - $today) . "D");
+                    $stop->add($interval);
+                } else if (($stopMonth = array_search(substr($dates[$datePosition], 0, 3), $months)) !== false) {
+                    $stopDay = $dates[$datePosition + 1];
+                    if (!$stopDay || $stopDay > 31) {
+                        $response .= "Wrong end date: [" . $dates[$datePosition] . " " . $dates[$datePosition + 1] . "]\n";
+                        continue;
+                    }
+                    $year = date("Y");
+                    $stop = new Datetime();
+                    $stop->setDate($year, $stopMonth + 1, $stopDay);
+                    $stop->setTime(23, 59, 59);
+                } else {
+                    $response .= "Not sure what you mean by [" . $dates[$datePosition] . "]";
+                    continue;
+                }
+            }
+            if (!$stop) {
+                $stop = clone($start);
+                $stop->setTime(23, 59, 59);
             }
             $newStart = clone($stop);
             $newStart->add(new \DateInterval('PT1S'));
@@ -311,7 +342,7 @@ class DefaultController extends Controller
      */
     private function separator($size, $weeks, $char = '=')
     {
-        $result = '+' . str_repeat($char,12). '+';
+        $result = '+' . str_repeat($char, 12) . '+';
         for ($i = 0; $i < $weeks; $i++) {
             foreach ($this->weekDays as $j => $day) {
                 if ($weeks == 1 && $j > 4) {
@@ -382,7 +413,7 @@ class DefaultController extends Controller
         $options = array_merge([
             'mode' => 'full',
             'size' => 'week',
-            'team' => false,
+            'teams' => false,
                 ], $options);
         $cellSize = $options['mode'] == 'full' ? 9 : 1;
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
@@ -405,7 +436,7 @@ class DefaultController extends Controller
         }
 
         $response = "```\n" . $this->getHeader($cellSize, $weeks);
-        if ($options['team']) {
+        if ($options['teams']) {
             $users = [];
             $teams = $teamRepository->findBy([], ['position' => 'ASC']);
             foreach ($teams as $team) {
@@ -421,7 +452,7 @@ class DefaultController extends Controller
         $weekStart = $this->getWeekStart($today);
         $team = "";
         foreach ($userList as $user) {
-            if ($options['team'] && $team && $team !== $user->getTeam()->getName()) {
+            if ($options['teams'] && $team && $team !== $user->getTeam()->getName()) {
                 $response .= $this->separator($cellSize, $weeks, '=');
             }
             $team = $user->getTeam()->getName();
