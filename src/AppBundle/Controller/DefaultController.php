@@ -33,6 +33,14 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/test", name="test")
+     */
+    public function testAction(Request $request) {
+        $response = json_decode($this->slackAction($request)->getContent(),true);
+        return new Response($response['text'], 200, ['content-type' => 'text/plain']);
+    }
+
+    /**
      * @Route("/slack", name="slack")
      */
     public function slackAction(Request $request)
@@ -544,7 +552,7 @@ class DefaultController extends Controller
             $response .= $this->separator($cellSize, $weeks);
             $response .= "| OFFICE --> |";
             for ($i = 0; $i < 5; $i++) {
-                $response .= " " . sprintf(" %2d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
+                $response .= " " . sprintf("%3d%% (%2d)", 100 * $office[$i] / $users, $office[$i]) . " |";
             }
             $response .= "\n";
         }
@@ -553,6 +561,10 @@ class DefaultController extends Controller
         return $response;
     }
 
+    /**
+     *
+     * @param User $user
+     */
     private function showUpdate(User $user)
     {
         $response = $user->getName() . " updated his/her weekly presence:\n";
@@ -574,5 +586,4 @@ class DefaultController extends Controller
         ]);
         $result = curl_exec($curl);
     }
-
 }
