@@ -74,9 +74,7 @@ class DefaultController extends Controller
                     break;
                 case 'set':
                     $response .= $this->getPeriod($user, $matches[1]);
-                    $response .= $this->people($user,[
-                        'mode' => 'full',
-                    ]);
+                    $response .= $this->people();
                     if ($request->getMethod() !== 'GET' && !$this->mute) {
                         $this->showUpdate($user);
                     }
@@ -558,7 +556,10 @@ class DefaultController extends Controller
     private function showUpdate(User $user)
     {
         $response = $user->getName() . " updated his/her weekly presence:\n";
-        $response .= $this->people($user, [ 'mode' => "full"]);
+        $response .= $this->people($user, [
+            'mode' => 'compact',
+            'size' => "month",
+        ]);
         $payload = json_encode([
             "text" => $response,
         ]);
