@@ -458,10 +458,11 @@ class DefaultController extends Controller
         $weekStart = $this->getWeekStart($today);
         $team = "";
         foreach ($userList as $user) {
-            if ($options['teams'] && $team && $team !== $user->getTeam()->getName()) {
+            $userTeam = $user->getTeam() ? $user->getTeam()->getName() : 'NO_TEAM';
+            if ($options['teams'] && $team && $team !== $userTeam) {
                 $response .= $this->separator($cellSize, $weeks, '=');
             }
-            $team = $user->getTeam()->getName();
+            $team = $userTeam;
             $users++;
             $response .= "| " . sprintf("%10s", $user->getName()) . " |";
             $day = clone($weekStart);
