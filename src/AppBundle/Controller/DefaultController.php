@@ -15,6 +15,8 @@ class DefaultController extends Controller
 {
 
     private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    private $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
     private $mute = false;
 
     const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+) *([0-9]+)?)?/',
@@ -483,7 +485,7 @@ class DefaultController extends Controller
                 } else {
                     foreach ($user->getPeriods() as $period) {
                         if ($period->getStart() <= $day && $period->getStop() > $day) {
-                            $newStatus = strtoupper($period->getType());
+                            $newStatus = strtoupper($period->getType()).'*';
                             $foundPeriod = true;
                             break;
                         }
