@@ -2,14 +2,14 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Period;
-use AppBundle\Entity\User;
-use DateInterval;
-use DateTime;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use AppBundle\Entity\Period,
+    AppBundle\Entity\User,
+    DateInterval,
+    DateTime,
+    Sensio\Bundle\FrameworkExtraBundle\Configuration\Route,
+    Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller
 {
@@ -74,6 +74,9 @@ class DefaultController extends Controller
         $text = strtolower($args['text']);
         if (preg_match_all(self::CMD_PERIOD_REGEX, $text, $matches) > 0) {
             switch ($matches[1][0]) {
+                case 'calendar':
+                    $response = $this->calendar();
+                    break;
                 case 'home':
                 case 'office':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[1]));
@@ -588,5 +591,54 @@ class DefaultController extends Controller
             CURLOPT_RETURNTRANSFER => true
         ]);
         $result = curl_exec($curl);
+    }
+
+    private function calendar($options = []) {
+        $options = array_merge([
+            'month' => 'current',
+            'size' => 2,
+        ],$options);
+        $months  = $options['month'] == 'current' ?
+            [ date('n') ] : range(1,12);
+        $response = "```\n+";
+        foreach ($this->weekDays as $day) {
+            $response.=str_repeat("=", $options['size']+2)."+";
+        }
+        $response .= "\n|";
+        foreach ($this->weekDays as $day) {
+            $response.=sprintf(" %".$options['size']."s |",substr($day,0,$options['size']));
+        }
+        $response .= "\n+";
+        foreach ($this->weekDays as $day) {
+            $response.=str_repeat("=", $options['size']+2)."+";
+        }
+        $response .= "\n|";
+        foreach ($months as $i) {
+            $d = 1;
+            $date = new DateTime();
+            $date->setDate(date('Y'), $i, 1);
+            $wday = $date->format('N') - 1;
+            for ($j = 0; $j<$wday; $j++) {
+                $response .= sprintf(" %".$options['size']."s |"," ");
+            }
+            do {
+                $response .= sprintf(" % ".$options['size']."d |", $d);
+                $d++;
+                $wday = ($wday+1) % 7;
+                if (!$wday) {
+                    $response .= "\n|";
+                }
+                $date->add(new DateInterval("P1D"));
+            } while ($date->format('n') == $i);
+            for ($j = $wday; $j<7; $j++) {
+                $response .= sprintf(" %".$options['size']."s |"," ");
+            }
+        }
+        $response .= "\n+";
+        foreach ($this->weekDays as $day) {
+            $response.=str_repeat("=", $options['size']+2)."+";
+        }
+        $response .= "\n```";
+        return $response;
     }
 }
