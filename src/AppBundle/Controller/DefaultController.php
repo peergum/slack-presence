@@ -148,7 +148,9 @@ class DefaultController extends Controller
                             . "     `month [teams]` (one month from this week on, compact)\n"
                             . "     `teams` (same as `people teams`)\n"
                             . "- *Note*\n"
-                            . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n";
+                            . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n"
+                        . "- *Quick calendar for current month*\n"
+                        . "    `calendar`\n";
                     break;
             }
         } else {
