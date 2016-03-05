@@ -15,8 +15,8 @@ class DefaultController extends Controller
 {
 
     private $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    private $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-
+    private $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+        'October', 'November', 'December'];
     private $mute = false;
 
     const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+) *([0-9]+)?)?/',
@@ -37,8 +37,9 @@ class DefaultController extends Controller
     /**
      * @Route("/test", name="test")
      */
-    public function testAction(Request $request) {
-        $response = json_decode($this->slackAction($request)->getContent(),true);
+    public function testAction(Request $request)
+    {
+        $response = json_decode($this->slackAction($request)->getContent(), true);
         return new Response($response['text'], 200, ['content-type' => 'text/plain']);
     }
 
@@ -150,8 +151,8 @@ class DefaultController extends Controller
                             . "     `teams` (same as `people teams`)\n"
                             . "- *Note*\n"
                             . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n"
-                        . "- *Quick calendar for current month*\n"
-                        . "    `calendar`\n";
+                            . "- *Quick calendar for current month*\n"
+                            . "    `calendar`\n";
                     break;
             }
         } else {
@@ -334,24 +335,24 @@ class DefaultController extends Controller
             $days = true;
             if ($values[0] == 'home') {
                 $newPresence |= pow(2, $pos);
-                $newPresence &= ~pow(2, $pos+5);
+                $newPresence &= ~pow(2, $pos + 5);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
-                $newPresence &= ~pow(2, $pos+5);
+                $newPresence &= ~pow(2, $pos + 5);
             } else if ($values[0] == 'off') {
-                $newPresence |= pow(2, $pos+5);
+                $newPresence |= pow(2, $pos + 5);
             }
         }
         if (!$days) {
             $pos = date("N") - 1;
             if ($values[0] == 'home') {
                 $newPresence |= pow(2, $pos);
-                $newPresence &= ~pow(2, $pos+5);
+                $newPresence &= ~pow(2, $pos + 5);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
-                $newPresence &= ~pow(2, $pos+5);
+                $newPresence &= ~pow(2, $pos + 5);
             } else if ($values[0] == 'off') {
-                $newPresence |= pow(2, $pos+5);
+                $newPresence |= pow(2, $pos + 5);
             }
         }
         return $newPresence;
@@ -499,7 +500,7 @@ class DefaultController extends Controller
                 } else {
                     foreach ($user->getPeriods() as $period) {
                         if ($period->getStart() <= $day && $period->getStop() > $day) {
-                            $newStatus = strtoupper($period->getType()).'*';
+                            $newStatus = strtoupper($period->getType()) . '*';
                             $foundPeriod = true;
                             break;
                         }
@@ -587,7 +588,8 @@ class DefaultController extends Controller
     private function showUpdate(User $user)
     {
         $response = $user->getName() . " updated his/her weekly presence:\n";
-        $response .= $this->people($user, [
+        $response .= $this->people($user,
+                [
             'mode' => 'compact',
             'size' => "month",
         ]);
@@ -606,52 +608,87 @@ class DefaultController extends Controller
         $result = curl_exec($curl);
     }
 
-    private function calendar($options = []) {
+    private function calendar($options = [])
+    {
         $options = array_merge([
             'month' => 'current',
             'size' => 2,
-        ],$options);
-        $months  = $options['month'] == 'current' ?
-            [ date('n') ] : range(1,12);
-        $response = "```\n+";
-        foreach ($this->weekDays as $day) {
-            $response.=str_repeat("=", $options['size']+2)."+";
+                ], $options);
+        $today = date('j');
+        $thisMonth = date('n');
+        $threeMonths = [];
+        if ($thisMonth>1) {
+            $threeMonths[]=$thisMonth-1;
         }
-        $response .= "\n|";
-        foreach ($this->weekDays as $day) {
-            $response.=sprintf(" %".$options['size']."s |",substr($day,0,$options['size']));
+        $threeMonths[]=$thisMonth;
+        if ($thisMonth<12) {
+            $threeMonths[]=$thisMonth+1;
         }
-        $response .= "\n+";
-        foreach ($this->weekDays as $day) {
-            $response.=str_repeat("=", $options['size']+2)."+";
-        }
-        $response .= "\n|";
+        $months = $options['month'] == 'current' ?
+                $threeMonths : range(1, 12);
+        $response = "```\n";
+        $width = ($options['size'] + 3) * count($this->weekDays) - 1;
         foreach ($months as $i) {
+            $response .= '+' . str_repeat('=', $width) . "+\n";
+            $start = floor(($width - strlen($this->months[$i - 1])) / 2);
+            $response .= "|".
+                    str_repeat(" ", $start) .
+                    $this->months[$i - 1] .
+                    str_repeat(" ", $width - $start - strlen($this->months[$i - 1])) . "|\n"
+                    . "+";
+            foreach ($this->weekDays as $day) {
+                $response.=str_repeat("=", $options['size'] + 2) . "+";
+            }
+            $response .= "\n|";
+            foreach ($this->weekDays as $day) {
+                $response.=sprintf(" %" . $options['size'] . "s |",
+                        substr($day, 0, $options['size']));
+            }
+            $response .= "\n+";
+            foreach ($this->weekDays as $day) {
+                $response.=str_repeat("=", $options['size'] + 2) . "+";
+            }
+            $response .= "\n|";
             $d = 1;
             $date = new DateTime();
             $date->setDate(date('Y'), $i, 1);
             $wday = $date->format('N') - 1;
-            for ($j = 0; $j<$wday; $j++) {
-                $response .= sprintf(" %".$options['size']."s |"," ");
+            for ($j = 0; $j < $wday; $j++) {
+                $response .= sprintf(" %" . $options['size'] . "s |", " ");
             }
-            do {
-                $response .= sprintf(" % ".$options['size']."d |", $d);
+            while ($date->format('n') == $i) {
+                $response .= sprintf(" % " . $options['size'] . "d |", $d);
                 $d++;
-                $wday = ($wday+1) % 7;
-                if (!$wday) {
-                    $response .= "\n|";
-                }
+                $wday = ($wday + 1) % 7;
                 $date->add(new DateInterval("P1D"));
-            } while ($date->format('n') == $i);
-            for ($j = $wday; $j<7; $j++) {
-                $response .= sprintf(" %".$options['size']."s |"," ");
+                if (!$wday) {
+                    if ($i == $thisMonth && $today >= $d && $today < $d + 7) {
+                        $response .= "\n+";
+                        foreach ($this->weekDays as $day) {
+                            $response.=str_repeat("·", $options['size'] + 2) . "+";
+                        }
+                    }
+                    if ($i == $thisMonth && $today >= $d - 7 && $today < $d) {
+                        $response .= "\n+";
+                        foreach ($this->weekDays as $day) {
+                            $response.=str_repeat("·", $options['size'] + 2) . "+";
+                        }
+                    }
+                    $response .= "\n" . ($date->format('n') == $i ? "|" : "");
+
+                }
+            };
+            for ($j = $wday; $j>0 && $j < 7; $j++) {
+                $response .= sprintf(" %" . $options['size'] . "s |", " ");
             }
+            $response .= ($j ? "\n": "") ."+";
+            foreach ($this->weekDays as $day) {
+                $response.=str_repeat("=", $options['size'] + 2) . "+";
+            }
+            $response .= "\n\n";
         }
-        $response .= "\n+";
-        foreach ($this->weekDays as $day) {
-            $response.=str_repeat("=", $options['size']+2)."+";
-        }
-        $response .= "\n```";
+        $response .= "```";
         return $response;
     }
+
 }
