@@ -79,6 +79,7 @@ class DefaultController extends Controller
                     break;
                 case 'home':
                 case 'office':
+                case 'off':
                     $user->setPresence($this->setDays($user->getPresence(), $matches[1]));
                     $response .= $this->people();
                     if (!$this->mute) {
@@ -135,7 +136,7 @@ class DefaultController extends Controller
                     $response = "Quick Help:\n"
                             . "- *Regular schedule* (home/office)\n"
                             . "  Set your home or office days:\n"
-                            . "     `home|office [mon|tue|wed|thu|fri] ..`\n"
+                            . "     `home|office|off [mon|tue|wed|thu|fri] ..`\n"
                             . "  (if no weekday informed, current weekday is used)\n"
                             . "- *Special Schedule* (one-time change home/office or\n"
                             . "  other events):\n"
@@ -333,16 +334,24 @@ class DefaultController extends Controller
             $days = true;
             if ($values[0] == 'home') {
                 $newPresence |= pow(2, $pos);
+                $newPresence &= ~pow(2, $pos+5);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
+                $newPresence &= ~pow(2, $pos+5);
+            } else if ($values[0] == 'off') {
+                $newPresence |= pow(2, $pos+5);
             }
         }
         if (!$days) {
             $pos = date("N") - 1;
             if ($values[0] == 'home') {
                 $newPresence |= pow(2, $pos);
+                $newPresence &= ~pow(2, $pos+5);
             } else if ($values[0] == 'office') {
                 $newPresence &= ~pow(2, $pos);
+                $newPresence &= ~pow(2, $pos+5);
+            } else if ($values[0] == 'off') {
+                $newPresence |= pow(2, $pos+5);
             }
         }
         return $newPresence;
@@ -497,7 +506,9 @@ class DefaultController extends Controller
                     }
                 }
                 if (!$foundPeriod && $i % 7 < 5) {
-                    if (pow(2, $i % 7) & $user->getPresence()) {
+                    if (pow(2, 5 + $i % 7) & $user->getPresence()) {
+                        $newStatus = "-";
+                    } else if (pow(2, $i % 7) & $user->getPresence()) {
                         $newStatus = "HOME";
                     } else {
                         $newStatus = "OFFICE";
