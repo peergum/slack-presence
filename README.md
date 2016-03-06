@@ -37,3 +37,142 @@ by `-` followed by another week day or date (e.g. `Thu - Mar 12`)
 
 #Showing schedules
 
+To list people's schedules, just type `people`. You'll get current week's schedule as shown
+in the example below:
+
+```
++============+===========+===========+===========+===========+===========+
+| Person     | Monday 07 | Tuesda 08 | Wednes 09 | Thursd 10 | Friday 11 |
++============+===========+===========+===========+===========+===========+
+|     andrew | ...... OFFICE ....... |   HOME    |  OFFICE   |   HOME    |
+|    andrewk | ........................ OFFICE ......................... |
+|     angela | ........................ OFFICE ......................... |
+|    ciprian |  OFFICE   | ....... HOME ........ |  OFFICE   |   HOME    |
+|     cydney | ......................... HOME .......................... |
+|      daveb | ........................ OFFICE ......................... |
+|      davec | ............ OFFICE ............. | ....... HOME ........ |
+|       hawk | ......................... HOME .......................... |
+|      jason |   HOME    |  OFFICE   |   HOME    |  OFFICE   |   HOME    |
+|       judy | ......................... HOME .......................... |
+|      leeia |  OFFICE   |   HOME    | ...... OFFICE ....... |   HOME    |
+|    melanie |   HOME    | ............ OFFICE ............. |   HOME    |
+|    michael | ............. HOME .............. |  OFFICE   |   HOME    |
+|       phil | ...... OFFICE ....... |   HOME    |  OFFICE   |   HOME    |
+|       rick | .................. OFFICE ................... |   HOME    |
+|      sapna |   HOME    |  OFFICE   |   HOME    |  OFFICE   |   HOME    |
+|       sara | ........................ OFFICE ......................... |
+|      thais | ................... HOME .................... |   HOME*   |
+|     thomas | ......................... HOME .......................... |
+|      tolga | ......................... HOME .......................... |
+|     travis | ........................ OFFICE ......................... |
+|     victor | ........................ OFFICE ......................... |
+|     yannie | ...... OFFICE ....... |   HOME    | ...... OFFICE ....... |
+|       yuzo |   HOME    | ............ OFFICE ............. |   HOME    |
++============+===========+===========+===========+===========+===========+
+| OFFICE --> |  54% (13) |  62% (15) |  45% (11) |  70% (17) |  29% ( 7) |
++============+===========+===========+===========+===========+===========+
+```
+
+`people` also show the number of people physically present at the office every day,
+which is useful if you need to order meals for lunch & learns, etc...
+
+Also note specific schedules (not recurring) are shown with a `*`.
+
+If you're on a phone, use `compact` instead, which will give you a narrower view
+more adapted to phones, without the stats line, and possibly without the `*` for
+specific schedules (depending on size available):
+
+```
++============+===+===+===+===+===+
+| Person     | M | T | W | T | F |
++============+===+===+===+===+===+
+|     andrew | OFFIC | H | O | H |
+|    andrewk | .... OFFICE ..... |
+|     angela | .... OFFICE ..... |
+|    ciprian | O | HOME  | O | H |
+|     cydney | ..... HOME ...... |
+|      daveb | .... OFFICE ..... |
+|      davec |  OFFICE . | HOME  |
+|       hawk | ..... HOME ...... |
+|      jason | H | O | H | O | H |
+|       judy | ..... HOME ...... |
+|      leeia | O | H | OFFIC | H |
+|    melanie | H |  OFFICE . | H |
+|    michael | . HOME .. | O | H |
+|       phil | OFFIC | H | O | H |
+|       rick | .. OFFICE ... | H |
+|      sapna | H | O | H | O | H |
+|       sara | .... OFFICE ..... |
+|      thais | ... HOME .... | H |
+|     thomas | ..... HOME ...... |
+|      tolga | ..... HOME ...... |
+|     travis | .... OFFICE ..... |
+|     victor | .... OFFICE ..... |
+|     yannie | OFFIC | H | OFFIC |
+|       yuzo | H |  OFFICE . | H |
++============+===+===+===+===+===+
+```
+
+If you need to see more than one week, `2weeks` will show you this week and the next one,
+and `month` will show you this week and the next three ones (sliding month).
+
+##Available soon:
+
+adding `teams` to the command will show you the same results but with people organized by
+team:
+```
++============+===========+===========+===========+===========+===========+
+| Person     | Monday 07 | Tuesda 08 | Wednes 09 | Thursd 10 | Friday 11 |
++============+===========+===========+===========+===========+===========+
+|      davec | ............ OFFICE ............. | ....... HOME ........ |
+|       yuzo |   HOME    | ............ OFFICE ............. |   HOME    |
++============+===========+===========+===========+===========+===========+
+|     angela | ........................ OFFICE ......................... |
+|      daveb | ........................ OFFICE ......................... |
+|      jason |   HOME    |  OFFICE   |   HOME    |  OFFICE   |   HOME    |
+|      leeia |  OFFICE   |   HOME    | ...... OFFICE ....... |   HOME    |
+|    melanie |   HOME    | ............ OFFICE ............. |   HOME    |
+|       sara | ........................ OFFICE ......................... |
+|      thais | ................... HOME .................... |   HOME*   |
+|      tolga | ......................... HOME .......................... |
++============+===========+===========+===========+===========+===========+
+|     cydney | ......................... HOME .......................... |
+|       judy | ......................... HOME .......................... |
+|       rick | .................. OFFICE ................... |   HOME    |
+|      sapna |   HOME    |  OFFICE   |   HOME    |  OFFICE   |   HOME    |
+|     yannie | ...... OFFICE ....... |   HOME    | ...... OFFICE ....... |
++============+===========+===========+===========+===========+===========+
+|       hawk | ......................... HOME .......................... |
+|    michael | ............. HOME .............. |  OFFICE   |   HOME    |
+|     travis | ........................ OFFICE ......................... |
++============+===========+===========+===========+===========+===========+
+|     andrew | ...... OFFICE ....... |   HOME    |  OFFICE   |   HOME    |
+|    andrewk | ........................ OFFICE ......................... |
+|    ciprian |  OFFICE   | ....... HOME ........ |  OFFICE   |   HOME    |
+|       phil | ...... OFFICE ....... |   HOME    |  OFFICE   |   HOME    |
+|     thomas | ......................... HOME .......................... |
+|     victor | ........................ OFFICE ......................... |
++============+===========+===========+===========+===========+===========+
+| OFFICE --> |  54% (13) |  62% (15) |  45% (11) |  70% (17) |  29% ( 7) |
++============+===========+===========+===========+===========+===========+
+```
+
+#Calendar
+
+`calendar` shows you a simple calendar for previous month, current month and next month.
+
+#Holidays
+
+Legal holidays are shown depending on user's country, with the holiday name or
+a `*` in the compact view.
+
+_(coming soon)_
+
+#Defining teams
+
+People can be assigned to teams.
+
+_(coming soon)_
+
+
+
