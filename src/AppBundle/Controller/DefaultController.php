@@ -135,9 +135,10 @@ class DefaultController extends Controller
                     break;
                 default:
                     $response = "Quick Help:\n"
-                            . "- *Regular schedule* (home/office)\n"
-                            . "  Set your home or office days:\n"
+                            . "- *Regular schedule* (home/office/off)\n"
+                            . "  Set your home, office or not working days:\n"
                             . "     `home|office|off [mon|tue|wed|thu|fri] ..`\n"
+                            . "     _careful_: off = not working day\n"
                             . "  (if no weekday informed, current weekday is used)\n"
                             . "- *Special Schedule* (one-time change home/office or\n"
                             . "  other events):\n"
