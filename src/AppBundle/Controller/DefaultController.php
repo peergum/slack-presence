@@ -519,7 +519,7 @@ class DefaultController extends Controller
                 } else if (!$foundPeriod) {
                     $newStatus = "-";
                 }
-                if ((true || $today < $i - 1 || $today >= $i + 1) && ($status == "" || $newStatus == $status || substr($newstatus,0,$strlen($newStatus)-1) === $status)) {
+                if ((true || $today < $i - 1 || $today >= $i + 1) && ($status == "" || $newStatus == $status || substr($newstatus,0,strlen($newStatus)-1) === $status)) {
                     $days++;
                 } else {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
