@@ -521,8 +521,7 @@ class DefaultController extends Controller
                 }
                 if ($status == "" ||
                         $newStatus == $status ||
-                        (substr($newstatus, 0, strlen($newStatus) - 1) == $status &&
-                        substr($newstatus, strlen($newStatus) - 1, 1) == "*")
+                        $newStatus == $status . '*'
                 ) {
                     $days++;
                 } else {
@@ -545,8 +544,7 @@ class DefaultController extends Controller
                 $day->add(new DateInterval("P1D"));
             }
             if ($newStatus == $status ||
-                    (substr($newstatus, 0, strlen($newStatus) - 1) == $status &&
-                    substr($newstatus, strlen($newStatus) - 1, 1) == "*")
+                    $newStatus == $status . '*'
             ) {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
@@ -567,7 +565,7 @@ class DefaultController extends Controller
                 $day->add(new DateInterval("P1W"));
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = strtoupper($period->getType());
+                        $newStatus = ucwords($period->getType());
                         $response .= ($newStatus != $status ? (" " . $newStatus) : '') . " -> " . $period->getStop()->format('M j');
                         break;
                     }
