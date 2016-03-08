@@ -519,7 +519,11 @@ class DefaultController extends Controller
                 } else if (!$foundPeriod) {
                     $newStatus = "-";
                 }
-                if ((true || $today < $i - 1 || $today >= $i + 1) && ($status == "" || $newStatus == $status || substr($newstatus,0,strlen($newStatus)-1) === $status)) {
+                if ($status == "" ||
+                        $newStatus == $status ||
+                        (substr($newstatus, 0, strlen($newStatus) - 1) == $status &&
+                        substr($newstatus, strlen($newStatus) - 1, 1) == "*")
+                ) {
                     $days++;
                 } else {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
@@ -540,7 +544,10 @@ class DefaultController extends Controller
                 $status = $newStatus;
                 $day->add(new DateInterval("P1D"));
             }
-            if ($status == $newStatus) {
+            if ($newStatus == $status ||
+                    (substr($newstatus, 0, strlen($newStatus) - 1) == $status &&
+                    substr($newstatus, strlen($newStatus) - 1, 1) == "*")
+            ) {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
@@ -618,12 +625,12 @@ class DefaultController extends Controller
         $today = date('j');
         $thisMonth = date('n');
         $threeMonths = [];
-        if ($thisMonth>1) {
-            $threeMonths[]=$thisMonth-1;
+        if ($thisMonth > 1) {
+            $threeMonths[] = $thisMonth - 1;
         }
-        $threeMonths[]=$thisMonth;
-        if ($thisMonth<12) {
-            $threeMonths[]=$thisMonth+1;
+        $threeMonths[] = $thisMonth;
+        if ($thisMonth < 12) {
+            $threeMonths[] = $thisMonth + 1;
         }
         $months = $options['month'] == 'current' ?
                 $threeMonths : range(1, 12);
@@ -632,7 +639,7 @@ class DefaultController extends Controller
         foreach ($months as $i) {
             $response .= '+' . str_repeat('=', $width) . "+\n";
             $start = floor(($width - strlen($this->months[$i - 1])) / 2);
-            $response .= "|".
+            $response .= "|" .
                     str_repeat(" ", $start) .
                     $this->months[$i - 1] .
                     str_repeat(" ", $width - $start - strlen($this->months[$i - 1])) . "|\n"
@@ -676,13 +683,12 @@ class DefaultController extends Controller
                         }
                     }
                     $response .= "\n" . ($date->format('n') == $i ? "|" : "");
-
                 }
             };
-            for ($j = $wday; $j>0 && $j < 7; $j++) {
+            for ($j = $wday; $j > 0 && $j < 7; $j++) {
                 $response .= sprintf(" %" . $options['size'] . "s |", " ");
             }
-            $response .= ($j ? "\n": "") ."+";
+            $response .= ($j ? "\n" : "") . "+";
             foreach ($this->weekDays as $day) {
                 $response.=str_repeat("=", $options['size'] + 2) . "+";
             }
