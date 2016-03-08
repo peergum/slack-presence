@@ -519,10 +519,7 @@ class DefaultController extends Controller
                 } else if (!$foundPeriod) {
                     $newStatus = "-";
                 }
-                if ($status == "" ||
-                        $newStatus == $status ||
-                        $newStatus == $status . '*'
-                ) {
+                if ($status == "" || $newStatus == $status) {
                     $days++;
                 } else {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
@@ -543,9 +540,7 @@ class DefaultController extends Controller
                 $status = $newStatus;
                 $day->add(new DateInterval("P1D"));
             }
-            if ($newStatus == $status ||
-                    $newStatus == $status . '*'
-            ) {
+            if ($newStatus == $status) {
                 $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
                 $size = ($cellSize + 3) * $days - 1;
                 $start = floor(($size - strlen($showStatus)) / 2);
