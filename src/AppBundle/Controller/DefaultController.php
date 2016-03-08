@@ -531,7 +531,7 @@ class DefaultController extends Controller
                     } else {
                         $response .= substr(" ." . str_repeat(".", $start), 0, $start)
                                 . $showStatus
-                                . substr(str_repeat(".", $end) . ". ", -$end+1, $end) . "|";
+                                . substr(str_repeat(".", $end) . ". ", -$end, $end) . "|";
                     }
                     $days = 1;
                 }
@@ -548,7 +548,7 @@ class DefaultController extends Controller
                 } else {
                     $response .= substr(" ." . str_repeat(".", $start), 0, $start)
                             . $showStatus
-                            . substr(str_repeat(".", $end) . ". ", -$end+1, $end) . "|";
+                            . substr(str_repeat(".", $end) . ". ", -$end, $end) . "|";
                 }
             }
             if ($options['mode'] == 'full') {
