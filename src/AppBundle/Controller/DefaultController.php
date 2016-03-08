@@ -501,7 +501,7 @@ class DefaultController extends Controller
                 } else {
                     foreach ($user->getPeriods() as $period) {
                         if ($period->getStart() <= $day && $period->getStop() > $day) {
-                            $newStatus = strtoupper($period->getType()) . '*';
+                            $newStatus = ucwords($period->getType()) . '*';
                             $foundPeriod = true;
                             break;
                         }
