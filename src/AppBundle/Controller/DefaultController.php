@@ -513,7 +513,7 @@ class DefaultController extends Controller
                     } else if (pow(2, $i % 7) & $user->getPresence()) {
                         $newStatus = "Home";
                     } else {
-                        $newStatus = "Offıce";
+                        $newStatus = "Office";
                         $office[$i % 7] ++;
                     }
                 } else if (!$foundPeriod) {
