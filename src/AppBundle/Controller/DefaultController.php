@@ -496,7 +496,7 @@ class DefaultController extends Controller
                 ]);
                 $foundPeriod = false;
                 if ($holiday) {
-                    $newStatus = $options['mode'] == "full" ? $holiday->getName() : "*";
+                    $newStatus = $options['mode'] == "full" ? ucwords($holiday->getName()) : "*";
                     $foundPeriod = true;
                 } else {
                     foreach ($user->getPeriods() as $period) {
@@ -511,9 +511,9 @@ class DefaultController extends Controller
                     if (pow(2, 5 + $i % 7) & $user->getPresence()) {
                         $newStatus = "-";
                     } else if (pow(2, $i % 7) & $user->getPresence()) {
-                        $newStatus = "HOME";
+                        $newStatus = "Home";
                     } else {
-                        $newStatus = "OFFICE";
+                        $newStatus = "Office";
                         $office[$i % 7] ++;
                     }
                 } else if (!$foundPeriod) {
