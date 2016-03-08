@@ -529,11 +529,9 @@ class DefaultController extends Controller
                     if ($days == 1 || $status == "-") {
                         $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     } else {
-                        $response .= substr(" ." . str_repeat(".", $start) . " ", 0, $start - 1)
-                                . " "
+                        $response .= substr(" ." . str_repeat(".", $start), 0, $start)
                                 . $showStatus
-                                . " "
-                                . substr(" " . str_repeat(".", $end) . ". ", -$end + 1, $end - 1) . "|";
+                                . substr(str_repeat(".", $end) . ". ", -$end+1, $end) . "|";
                     }
                     $days = 1;
                 }
@@ -548,11 +546,9 @@ class DefaultController extends Controller
                 if ($days == 1 || $status == "-") {
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                 } else {
-                    $response .= substr(" ." . str_repeat(".", $start) . " ", 0, $start - 1)
-                            . " "
+                    $response .= substr(" ." . str_repeat(".", $start), 0, $start)
                             . $showStatus
-                            . " "
-                            . substr(" " . str_repeat(".", $end) . ". ", -$end + 1, $end - 1) . "|";
+                            . substr(str_repeat(".", $end) . ". ", -$end+1, $end) . "|";
                 }
             }
             if ($options['mode'] == 'full') {
