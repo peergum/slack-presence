@@ -20,7 +20,7 @@ class DefaultController extends Controller
     private $mute = false;
 
     const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+) *([0-9]+)?)?/',
-            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+(( *[0-9]+)?( *- *[a-z]+( *[0-9]+)?)?)?)/';
+            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *[a-z]+( *[0-9]+)?)?)/';
 
     /**
      * @Route("/", name="homepage")
@@ -123,7 +123,8 @@ class DefaultController extends Controller
                     }
                     $response = $this->people($showUser,
                             [
-                        'mode' => 'full',
+                        'mode' => isset($matches[1][2]) ? 'compact' : 'full',
+                        'size' => isset($matches[1][2]) ? $matches[1][2] : 'full',
                         'teams' => false,
                     ]);
                     break;
@@ -135,10 +136,11 @@ class DefaultController extends Controller
                     ]);
                     break;
                 case '2weeks':
+                case 'weeks':
                     $response = $this->people(null,
                             [
                         'mode' => 'compact',
-                        'size' => "2weeks",
+                        'size' => "weeks",
                         'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
                     ]);
                     break;
@@ -172,10 +174,10 @@ class DefaultController extends Controller
                             . "- *Consultations*\n"
                             . "     `people [teams]` (current week, with days/dates)\n"
                             . "     `compact [teams]` (same, 1 char columns)\n"
-                            . "     `2weeks [teams]` (current and next week + weekends, compact)\n"
+                            . "     `weeks [teams]` (current and next week + weekends, compact)\n"
                             . "     `month [teams]` (one month from this week on, compact)\n"
                             . "     `teams` (same as `people teams`)\n"
-                            . "     `show <user>`\n"
+                            . "     `show <user> [compact|weeks|month]`\n"
                             . "- *Note*\n"
                             . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n"
                             . "- *Quick calendar for current month*\n"
@@ -481,7 +483,7 @@ class DefaultController extends Controller
             case 'week':
                 $weeks = 1;
                 break;
-            case '2weeks':
+            case 'weeks':
                 $weeks = 2;
                 break;
             case 'month':
