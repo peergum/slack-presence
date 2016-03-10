@@ -496,12 +496,12 @@ class DefaultController extends Controller
                 ]);
                 $foundPeriod = false;
                 if ($holiday) {
-                    $newStatus = $options['mode'] == "full" ? ucwords($holiday->getName()) : "*";
+                    $newStatus = $options['mode'] == "full" ? strtoupper($holiday->getName()) : "*";
                     $foundPeriod = true;
                 } else {
                     foreach ($user->getPeriods() as $period) {
                         if ($period->getStart() <= $day && $period->getStop() > $day) {
-                            $newStatus = ucwords($period->getType()) . '*';
+                            $newStatus = strtoupper($period->getType()) . '*';
                             $foundPeriod = true;
                             break;
                         }
@@ -511,9 +511,9 @@ class DefaultController extends Controller
                     if (pow(2, 5 + $i % 7) & $user->getPresence()) {
                         $newStatus = "-";
                     } else if (pow(2, $i % 7) & $user->getPresence()) {
-                        $newStatus = "Home";
+                        $newStatus = "HOME";
                     } else {
-                        $newStatus = "Office";
+                        $newStatus = "OFFICE";
                         $office[$i % 7] ++;
                     }
                 } else if (!$foundPeriod) {
@@ -556,7 +556,7 @@ class DefaultController extends Controller
                 $day->add(new DateInterval("P1W"));
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = ucwords($period->getType());
+                        $newStatus = strtoupper($period->getType());
                         $response .= ($newStatus != $status ? (" " . $newStatus) : '') . " -> " . $period->getStop()->format('M j');
                         break;
                     }
