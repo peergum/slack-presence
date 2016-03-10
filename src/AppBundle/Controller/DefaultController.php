@@ -102,12 +102,29 @@ class DefaultController extends Controller
                     ]);
                     break;
                 case 'people':
-                case 'list':
-                case 'show':
                     $response = $this->people(null,
                             [
                         'mode' => 'full',
                         'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
+                    ]);
+                    break;
+                case 'show':
+                    if (!isset($matches[1][1])) {
+                        $response .= "Not user informed\n";
+                        break;
+                    }
+                    $showUser = $userRepository->findOneBy([
+                        'name' => $matches[1][1],
+                    ]);
+
+                    if (!$showUser) {
+                        $response .= 'I don\'t know user [' . $matches[1][1] . ']';
+                        break;
+                    }
+                    $response = $this->people($showUser,
+                            [
+                        'mode' => 'full',
+                        'teams' => false,
                     ]);
                     break;
                 case 'compact':
@@ -214,7 +231,7 @@ class DefaultController extends Controller
                 }
                 $start = new DateTime();
                 $start->setTime(0, 0, 0);
-                $interval = new DateInterval("P" . ($pos - $today+ 7 * $next) . "D");
+                $interval = new DateInterval("P" . ($pos - $today + 7 * $next) . "D");
                 $start->add($interval);
                 $datePosition = 3;
             } else if (($startMonth = array_search(substr($dates[1], 0, 3), $months)) !== false) {
