@@ -180,14 +180,18 @@ class DefaultController extends Controller
     private function getPeriod(&$user, $values)
     {
         $response = '';
-        $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun', 'tom'];
         $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         $days = false;
         $today = date("N") - 1;
         array_shift($values);
+        $next = false;
         for ($i = 1; $i < count($values); $i++) {
             if (preg_match(self::PERIOD_REGEX, $values[$i], $dates) == 0) {
                 $response .= "Note: [" . $values[$i] . "] -> what do you mean?\n";
+                continue;
+            } else if ($dates[1] == "next") {
+                $next = true;
                 continue;
             }
             $start = null;
@@ -196,10 +200,13 @@ class DefaultController extends Controller
             if ($pos !== false) {
                 If ($pos < $today) {
                     $pos+=7;
+                } else if ($pos == 7) {
+                    // tomorrow
+                    $pos = $today + 1;
                 }
                 $start = new DateTime();
                 $start->setTime(0, 0, 0);
-                $interval = new DateInterval("P" . ($pos - $today) . "D");
+                $interval = new DateInterval("P" . ($pos - $today+ 7 * $next) . "D");
                 $start->add($interval);
                 $datePosition = 3;
             } else if (($startMonth = array_search(substr($dates[1], 0, 3), $months)) !== false) {
