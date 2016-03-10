@@ -70,7 +70,7 @@ class DefaultController extends Controller
             $user->setPresence(0);
         }
 
-        $response = "All set, " . $args['user_name'] . "\n";
+        $response = '';
 
         $text = strtolower($args['text']);
         if (preg_match_all(self::CMD_PERIOD_REGEX, $text, $matches) > 0) {
@@ -110,7 +110,7 @@ class DefaultController extends Controller
                     break;
                 case 'show':
                     if (!isset($matches[1][1])) {
-                        $response .= "Not user informed\n";
+                        $response .= "No user informed\n";
                         break;
                     }
                     $showUser = $userRepository->findOneBy([
