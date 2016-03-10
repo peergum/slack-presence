@@ -175,6 +175,7 @@ class DefaultController extends Controller
                             . "     `2weeks [teams]` (current and next week + weekends, compact)\n"
                             . "     `month [teams]` (one month from this week on, compact)\n"
                             . "     `teams` (same as `people teams`)\n"
+                            . "     `show <user>`\n"
                             . "- *Note*\n"
                             . "  Outside the #presence channel, prefix your command with `/presence`, you'll be the only one to see the command output.\n"
                             . "- *Quick calendar for current month*\n"
