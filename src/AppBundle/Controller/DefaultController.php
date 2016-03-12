@@ -109,13 +109,12 @@ class DefaultController extends Controller
                     ]);
                     break;
                 case 'show':
-                    if (!isset($matches[1][1])) {
-                        $response .= "No user informed\n";
-                        break;
+                    $showUser = $user;
+                    if (isset($matches[1][1]) && $matches[1][1] != "me") {
+                        $showUser = $userRepository->findOneBy([
+                            'name' => $matches[1][1],
+                        ]);
                     }
-                    $showUser = $userRepository->findOneBy([
-                        'name' => $matches[1][1],
-                    ]);
 
                     if (!$showUser) {
                         $response .= 'I don\'t know user [' . $matches[1][1] . ']';
