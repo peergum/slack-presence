@@ -537,6 +537,9 @@ class DefaultController extends Controller
                         if ($period->getStart() <= $day && $period->getStop() > $day) {
                             $newStatus = strtoupper($period->getType()) . '*';
                             $foundPeriod = true;
+                            if ($newStatus == "OFFICE*") {
+                                $office[$i % 7] ++;
+                            }
                             break;
                         }
                     }
@@ -599,7 +602,7 @@ class DefaultController extends Controller
 
             $response .= "\n";
         }
-        if (count($userList) > 1 && $options['mode'] == 'full') {
+        if (count($userList) >= 1 && $options['mode'] == 'full') {
             $response .= $this->separator($cellSize, $weeks);
             $response .= "| OFFICE --> |";
             for ($i = 0; $i < 5; $i++) {
