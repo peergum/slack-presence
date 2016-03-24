@@ -289,13 +289,18 @@ class DefaultController extends Controller
             $newStop->sub(new \DateInterval('PT1S'));
             $foundPeriod = false;
             foreach ($user->getPeriods() as $period) {
-                if ($period->getType() == $values[0] && $start == $period->getStart() && $stop == $period->getStop()) {
+                if ($start == $period->getStart() && $stop == $period->getStop()) {
                     // same period: remove
                     $foundPeriod = true;
-                    $user->removePeriod($period);
-                    $this->getDoctrine()->getManager()->remove($period);
+                    if ($values[0] == "clear") {
+                        $user->removePeriod($period);
+                        $this->getDoctrine()->getManager()->remove($period);
+                    } else if ($period->getType() != $values[0]) {
+                        $period->setType($values[0]);
+                        $this->getDoctrine()->getManager()->persist($period);
+                    }
                     break;
-                } else if ($period->getType() == $values[0] && $period->getStart() <= $start && $period->getStop() >= $stop) {
+                } else if ($period->getStart() <= $start && $period->getStop() >= $stop) {
                     // new period inside: split
                     $foundPeriod = true;
                     if ($period->getStart() == $start) {
@@ -323,13 +328,29 @@ class DefaultController extends Controller
                         $period->setStart($stop);
                         $user->addPeriod($newPeriod);
                     }
+                    if ($period->getType() != "clear") {
+                        $newPeriod = new Period();
+                        $newPeriod->setType($values[0]);
+                        $newPeriod->setStart($start);
+                        $newPeriod->setStop($newStop);
+                        $this->getDoctrine()->getManager()->persist($newPeriod);
+                        $user->addPeriod($newPeriod);
+                    }
                     break;
-                } else if ($period->getType() == $values[0] && $period->getStart() >= $start && $period->getStop() <= $stop) {
+                } else if ($period->getStart() >= $start && $period->getStop() <= $stop) {
                     $foundPeriod = true;
                     // new period outside: merge
-                    $period->setStart($start);
-                    $period->setStop($stop);
-                    $this->getDoctrine()->getManager()->persist($period);
+                    if ($values[0] == "clear") {
+                        $user->removePeriod($period);
+                        $this->getDoctrine()->getManager()->remove($period);
+                    } else {
+                        $period->setStart($start);
+                        $period->setStop($stop);
+                        if ($period->getType() != $values[0]) {
+                            $period->setType($values[0]);
+                        }
+                        $this->getDoctrine()->getManager()->persist($period);
+                    }
                 } else if ($period->getType() == $values[0] && $period->getStop() == $newStop || $period->getStart() == $newStart) {
                     $foundPeriod = true;
                     // periods overwrite or is adjacent: keep longest
@@ -342,7 +363,7 @@ class DefaultController extends Controller
                     $this->getDoctrine()->getManager()->persist($period);
                 }
             }
-            if (!$foundPeriod) {
+            if (!$foundPeriod && $values[0] != "clear") {
                 $period = new Period();
                 $period->setType($values[0]);
                 $period->setStart($start);
