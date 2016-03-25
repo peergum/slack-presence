@@ -94,6 +94,13 @@ class DefaultController extends Controller
                         $this->showUpdate($user);
                     }
                     break;
+                case 'clear':
+                    $response .= $this->getPeriod($user, array_merge(['clear'], $matches[1]));
+                    $response .= $this->people();
+                    if ($request->getMethod() !== 'GET' && !$this->mute) {
+                        $this->showUpdate($user);
+                    }
+                    break;
                 case 'teams':
                     $response = $this->people(null,
                             [
