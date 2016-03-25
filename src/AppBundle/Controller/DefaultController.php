@@ -558,20 +558,19 @@ class DefaultController extends Controller
                     'location' => $user->getLocation(),
                 ]);
                 $foundPeriod = false;
-                if ($holiday) {
+                foreach ($user->getPeriods() as $period) {
+                    if ($period->getStart() <= $day && $period->getStop() > $day) {
+                        $newStatus = strtoupper($period->getType()) . '*';
+                        $foundPeriod = true;
+                        if ($newStatus == "OFFICE*") {
+                            $office[$i % 7] ++;
+                        }
+                        break;
+                    }
+                }
+                if (!$foundPeriod && $holiday) {
                     $newStatus = $options['mode'] == "full" ? strtoupper($holiday->getName()) : "*";
                     $foundPeriod = true;
-                } else {
-                    foreach ($user->getPeriods() as $period) {
-                        if ($period->getStart() <= $day && $period->getStop() > $day) {
-                            $newStatus = strtoupper($period->getType()) . '*';
-                            $foundPeriod = true;
-                            if ($newStatus == "OFFICE*") {
-                                $office[$i % 7] ++;
-                            }
-                            break;
-                        }
-                    }
                 }
                 if (!$foundPeriod && $i % 7 < 5) {
                     if (pow(2, 5 + $i % 7) & $user->getPresence()) {
