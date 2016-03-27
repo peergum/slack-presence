@@ -560,25 +560,25 @@ class DefaultController extends Controller
                 $foundPeriod = false;
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = strtoupper($period->getType()) . '*';
+                        $newStatus = ucwords($period->getType()) . '*';
                         $foundPeriod = true;
-                        if ($newStatus == "OFFICE*") {
+                        if ($newStatus == "Office*") {
                             $office[$i % 7] ++;
                         }
                         break;
                     }
                 }
                 if (!$foundPeriod && $holiday) {
-                    $newStatus = $options['mode'] == "full" ? strtoupper($holiday->getName()) : "*";
+                    $newStatus = $options['mode'] == "full" ? ucwords($holiday->getName()) : "*";
                     $foundPeriod = true;
                 }
                 if (!$foundPeriod && $i % 7 < 5) {
                     if (pow(2, 5 + $i % 7) & $user->getPresence()) {
                         $newStatus = "-";
                     } else if (pow(2, $i % 7) & $user->getPresence()) {
-                        $newStatus = "HOME";
+                        $newStatus = "Home";
                     } else {
-                        $newStatus = "OFFICE";
+                        $newStatus = "Office";
                         $office[$i % 7] ++;
                     }
                 } else if (!$foundPeriod) {
@@ -621,7 +621,7 @@ class DefaultController extends Controller
                 $day->add(new DateInterval("P1W"));
                 foreach ($user->getPeriods() as $period) {
                     if ($period->getStart() <= $day && $period->getStop() > $day) {
-                        $newStatus = strtoupper($period->getType());
+                        $newStatus = ucwords($period->getType());
                         $response .= ($newStatus != $status ? (" " . $newStatus) : '') . " -> " . $period->getStop()->format('M j');
                         break;
                     }
