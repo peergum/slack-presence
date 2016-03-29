@@ -106,13 +106,15 @@ class DefaultController extends Controller
                             [
                         'mode' => 'full',
                         'teams' => true,
+                        'complete' => in_array('complete',$matches[1]),
                     ]);
                     break;
                 case 'people':
                     $response = $this->people(null,
                             [
                         'mode' => 'full',
-                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
+                        'teams' => in_array('teams',$matches[1]),
+                        'complete' => in_array('complete',$matches[1]),
                     ]);
                     break;
                 case 'show':
@@ -138,7 +140,8 @@ class DefaultController extends Controller
                     $response = $this->people(null,
                             [
                         'mode' => "compact",
-                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
+                        'teams' => in_array('teams',$matches[1]),
+                        'complete' => in_array('complete',$matches[1]),
                     ]);
                     break;
                 case '2weeks':
@@ -147,7 +150,8 @@ class DefaultController extends Controller
                             [
                         'mode' => 'compact',
                         'size' => "weeks",
-                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
+                        'teams' => in_array('teams',$matches[1]),
+                        'complete' => in_array('complete',$matches[1]),
                     ]);
                     break;
                 case 'month':
@@ -155,7 +159,8 @@ class DefaultController extends Controller
                             [
                         'mode' => 'compact',
                         'size' => "month",
-                        'teams' => isset($matches[1][1]) && $matches[1][1] == 'teams',
+                        'teams' => in_array('teams',$matches[1]),
+                        'complete' => in_array('complete',$matches[1]),
                     ]);
                     break;
                 default:
@@ -501,6 +506,7 @@ class DefaultController extends Controller
             'mode' => 'full',
             'size' => 'week',
             'teams' => false,
+            'complete' => false,
                 ], $options);
         $cellSize = $options['mode'] == 'full' ? 9 : 1;
         $userRepository = $this->getDoctrine()->getRepository('AppBundle:User');
@@ -584,7 +590,7 @@ class DefaultController extends Controller
                 } else if (!$foundPeriod) {
                     $newStatus = "-";
                 }
-                if ($status == "" || $newStatus == $status) {
+                if ($status == "" || (!$options['complete'] && $newStatus == $status)) {
                     $days++;
                 } else {
                     $showStatus = substr($status, 0, $cellSize + ($cellSize + 3) * ($days - 1));
