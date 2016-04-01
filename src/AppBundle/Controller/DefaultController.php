@@ -600,9 +600,9 @@ class DefaultController extends Controller
                     if ($days == 1 || $status == "-") {
                         $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                     } else {
-                        $response .= mb_substr(" …" . str_repeat("…", $start), 0, $start)
+                        $response .= mb_substr(" ·" . str_repeat("·", $start), 0, $start)
                                 . $showStatus
-                                . mb_substr(str_repeat("…", $end) . "… ", -$end, $end) . "|";
+                                . mb_substr(str_repeat("·", $end) . "· ", -$end, $end) . "|";
                     }
                     $days = 1;
                 }
@@ -617,9 +617,9 @@ class DefaultController extends Controller
                 if ($days == 1 || $status == "-") {
                     $response .= str_repeat(" ", $start) . $showStatus . str_repeat(" ", $end) . "|";
                 } else {
-                    $response .= mb_substr(" …" . str_repeat("…", $start), 0, $start)
+                    $response .= mb_substr(" ·" . str_repeat("·", $start), 0, $start)
                             . $showStatus
-                            . mb_substr(str_repeat("…", $end) . "… ", -$end, $end) . "|";
+                            . mb_substr(str_repeat("·", $end) . "· ", -$end, $end) . "|";
                 }
             }
             if ($options['mode'] == 'full') {
