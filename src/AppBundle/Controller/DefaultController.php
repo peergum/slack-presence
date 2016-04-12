@@ -280,10 +280,10 @@ class DefaultController extends Controller
                     $stop->setTime(23, 59, 59);
                     $interval = new DateInterval("P" . ($pos2 - $today) . "D");
                     $stop->add($interval);
-                } else if ($stopMonth = (
+                } else if (($stopMonth = (
                         $dates[$datePosition] != '' ?
                         array_search(substr($dates[$datePosition], 0, 3), $months) :
-                        $startMonth ) !== false) {
+                        $startMonth )) !== false) {
                     $stopDay = $dates[$datePosition + 1];
                     if (!$stopDay || $stopDay > 31) {
                         $response .= "Wrong end date: [" . $dates[$datePosition] . " " . $dates[$datePosition + 1] . "]\n";
