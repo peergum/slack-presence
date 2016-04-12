@@ -19,8 +19,8 @@ class DefaultController extends Controller
         'October', 'November', 'December'];
     private $mute = false;
 
-    const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+) *([0-9]+)?)?/',
-            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *[a-z]+( *[0-9]+)?)?)/';
+    const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+)? *([0-9]+)?)?/',
+            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *([a-z]+)?( *[0-9]+)?)?)/';
 
     /**
      * @Route("/", name="homepage")
@@ -268,7 +268,10 @@ class DefaultController extends Controller
                 continue;
             }
             if (count($dates) > $datePosition) {
-                $pos2 = array_search(substr($dates[$datePosition], 0, 3), $weekDays);
+                $pos2 = false;
+                if ($dates[$datePosition] != '') {
+                    $pos2 = array_search(substr($dates[$datePosition], 0, 3), $weekDays);
+                }
                 if ($pos2 !== false) {
                     while ($pos2 <= $pos) {
                         $pos2+=7;
@@ -277,7 +280,10 @@ class DefaultController extends Controller
                     $stop->setTime(23, 59, 59);
                     $interval = new DateInterval("P" . ($pos2 - $today) . "D");
                     $stop->add($interval);
-                } else if (($stopMonth = array_search(substr($dates[$datePosition], 0, 3), $months)) !== false) {
+                } else if (($stopMonth = (
+                        $dates[$datePosition] != '' ?
+                        array_search(substr($dates[$datePosition], 0, 3), $months) :
+                        $startMonth )) !== false) {
                     $stopDay = $dates[$datePosition + 1];
                     if (!$stopDay || $stopDay > 31) {
                         $response .= "Wrong end date: [" . $dates[$datePosition] . " " . $dates[$datePosition + 1] . "]\n";
