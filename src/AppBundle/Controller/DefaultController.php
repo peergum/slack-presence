@@ -20,7 +20,7 @@ class DefaultController extends Controller
     private $mute = false;
 
     const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+)? *([0-9]+)?)?/',
-            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *[a-z]+( *[0-9]+)?)?)/';
+            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *([a-z]+)?( *[0-9]+)?)?)/';
 
     /**
      * @Route("/", name="homepage")
