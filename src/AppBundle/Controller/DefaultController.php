@@ -269,7 +269,7 @@ class DefaultController extends Controller
             }
             if (count($dates) > $datePosition) {
                 $pos2 = false;
-                if ($dates[$datePosition]) {
+                if ($dates[$datePosition] != '') {
                     $pos2 = array_search(substr($dates[$datePosition], 0, 3), $weekDays);
                 }
                 if ($pos2 !== false) {
@@ -281,7 +281,7 @@ class DefaultController extends Controller
                     $interval = new DateInterval("P" . ($pos2 - $today) . "D");
                     $stop->add($interval);
                 } else if ($stopMonth = (
-                        $dates[$datePosition] ?
+                        $dates[$datePosition] != '' ?
                         array_search(substr($dates[$datePosition], 0, 3), $months) :
                         $startMonth ) !== false) {
                     $stopDay = $dates[$datePosition + 1];
