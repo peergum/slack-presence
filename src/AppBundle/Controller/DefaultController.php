@@ -394,33 +394,42 @@ class DefaultController extends Controller
     private function setDays($presence, $values)
     {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $types = ['home', 'office', 'off'];
         $newPresence = $presence;
         $days = false;
+        $type = $values[0];
         for ($i = 1; $i < count($values); $i++) {
+            if ($values[$i] == 'mute') {
+                $this->mute = true;
+                continue;
+            }
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos === false) {
+                if (array_search($values[$i], $types) !== false) {
+                    $type = $values[$i];
+                }
                 continue;
             }
             $days = true;
-            if ($values[0] == 'home') {
+            if ($type == 'home') {
                 $newPresence |= pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'office') {
+            } else if ($type == 'office') {
                 $newPresence &= ~pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'off') {
+            } else if ($type == 'off') {
                 $newPresence |= pow(2, $pos + 5);
             }
         }
         if (!$days) {
             $pos = date("N") - 1;
-            if ($values[0] == 'home') {
+            if ($type == 'home') {
                 $newPresence |= pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'office') {
+            } else if ($type == 'office') {
                 $newPresence &= ~pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'off') {
+            } else if ($type == 'off') {
                 $newPresence |= pow(2, $pos + 5);
             }
         }
