@@ -19,8 +19,8 @@ class DefaultController extends Controller
         'October', 'November', 'December'];
     private $mute = false;
 
-    const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+) *([0-9]+)?)?/',
-            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *[a-z]+( *[0-9]+)?)?)/';
+    const PERIOD_REGEX = '/([a-z]+) *([0-9]+)?(?: *- *([a-z]+)? *([0-9]+)?)?/',
+            CMD_PERIOD_REGEX = '/([0-9]*[a-z]+( *[0-9]+)?( *- *([a-z]+)?( *[0-9]+)?)?)/';
 
     /**
      * @Route("/", name="homepage")
@@ -268,7 +268,10 @@ class DefaultController extends Controller
                 continue;
             }
             if (count($dates) > $datePosition) {
-                $pos2 = array_search(substr($dates[$datePosition], 0, 3), $weekDays);
+                $pos2 = false;
+                if ($dates[$datePosition] != '') {
+                    $pos2 = array_search(substr($dates[$datePosition], 0, 3), $weekDays);
+                }
                 if ($pos2 !== false) {
                     while ($pos2 <= $pos) {
                         $pos2+=7;
@@ -277,7 +280,10 @@ class DefaultController extends Controller
                     $stop->setTime(23, 59, 59);
                     $interval = new DateInterval("P" . ($pos2 - $today) . "D");
                     $stop->add($interval);
-                } else if (($stopMonth = array_search(substr($dates[$datePosition], 0, 3), $months)) !== false) {
+                } else if (($stopMonth = (
+                        $dates[$datePosition] != '' ?
+                        array_search(substr($dates[$datePosition], 0, 3), $months) :
+                        $startMonth )) !== false) {
                     $stopDay = $dates[$datePosition + 1];
                     if (!$stopDay || $stopDay > 31) {
                         $response .= "Wrong end date: [" . $dates[$datePosition] . " " . $dates[$datePosition + 1] . "]\n";
@@ -346,6 +352,7 @@ class DefaultController extends Controller
                         $newPeriod->setType($values[0]);
                         $newPeriod->setStart($start);
                         $newPeriod->setStop($newStop);
+                        $newPeriod->setUser($user);
                         $this->getDoctrine()->getManager()->persist($newPeriod);
                         $user->addPeriod($newPeriod);
                     }
@@ -394,33 +401,42 @@ class DefaultController extends Controller
     private function setDays($presence, $values)
     {
         $weekDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $types = ['home', 'office', 'off'];
         $newPresence = $presence;
         $days = false;
+        $type = $values[0];
         for ($i = 1; $i < count($values); $i++) {
+            if ($values[$i] == 'mute') {
+                $this->mute = true;
+                continue;
+            }
             $pos = array_search(substr($values[$i], 0, 3), $weekDays);
             if ($pos === false) {
+                if (array_search($values[$i], $types) !== false) {
+                    $type = $values[$i];
+                }
                 continue;
             }
             $days = true;
-            if ($values[0] == 'home') {
+            if ($type == 'home') {
                 $newPresence |= pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'office') {
+            } else if ($type == 'office') {
                 $newPresence &= ~pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'off') {
+            } else if ($type == 'off') {
                 $newPresence |= pow(2, $pos + 5);
             }
         }
         if (!$days) {
             $pos = date("N") - 1;
-            if ($values[0] == 'home') {
+            if ($type == 'home') {
                 $newPresence |= pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'office') {
+            } else if ($type == 'office') {
                 $newPresence &= ~pow(2, $pos);
                 $newPresence &= ~pow(2, $pos + 5);
-            } else if ($values[0] == 'off') {
+            } else if ($type == 'off') {
                 $newPresence |= pow(2, $pos + 5);
             }
         }
