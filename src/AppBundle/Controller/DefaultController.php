@@ -352,6 +352,7 @@ class DefaultController extends Controller
                         $newPeriod->setType($values[0]);
                         $newPeriod->setStart($start);
                         $newPeriod->setStop($newStop);
+                        $newPeriod->setUser($user);
                         $this->getDoctrine()->getManager()->persist($newPeriod);
                         $user->addPeriod($newPeriod);
                     }
