@@ -1,3 +1,5 @@
+##Warning: this repository is **not** up-to-date and the symfony package used as security vulnerabilities, requiring an upgrade. I haven't had the time to handle that currently, and the lack of interest so far doesn't motivate me to do so, so *use and adapt at your own risk*. Feel free to contact/create an issue if interested anyway. - PG.
+
 slack-presence
 ==============
 
