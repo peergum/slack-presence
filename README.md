@@ -1,4 +1,6 @@
-##Warning: this repository is **not** up-to-date and the symfony package used as security vulnerabilities, requiring an upgrade. I haven't had the time to handle that currently, and the lack of interest so far doesn't motivate me to do so, so *use and adapt at your own risk*. Feel free to contact/create an issue if interested anyway. - PG.
+## Warning
+
+This repository is **not** up-to-date and the symfony package used as security vulnerabilities, requiring an upgrade. I haven't had the time to handle that currently, and the lack of interest so far doesn't motivate me to do so, so *use and adapt at your own risk*. Feel free to contact/create an issue if interested anyway. - PG.
 
 slack-presence
 ==============
@@ -6,7 +8,7 @@ slack-presence
 This project offers a set of simple commands that allows any company to
 track their staff schedule:
 
-#Recurrent schedule
+# Recurrent schedule
 
 A basic command allows people to inform where they will work each week day:
 - from Home
@@ -23,7 +25,7 @@ office on Monday, Tuesday, Thrusday and Friday, and home on Wednesday.
 
 The argument to the `office`, `home`, and `off` commands are week days, and only need the 3 first characters of the day name, case being ignored.
 
-#Specific events
+# Specific events
 
 A more complete command, `set`, allows everyone to set a specific event, be it
 working from home on a Wednesday when the person usually works from office that day,
@@ -37,7 +39,7 @@ by `-` followed by another week day or date (e.g. `Thu - Mar 12`)
 
 `set Vegas April 3 - April 17` will give you 2 weeks in Vegas, enjoy ;-) (*joke!*)
 
-#Showing schedules
+# Showing schedules
 
 To list people's schedules, just type `people`. You'll get current week's schedule as shown
 in the example below:
@@ -118,7 +120,7 @@ specific schedules (depending on size available):
 If you need to see more than one week, `2weeks` will show you this week and the next one,
 and `month` will show you this week and the next three ones (sliding month).
 
-##Available soon:
+## Available soon:
 
 adding `teams` to the command will show you the same results but with people organized by
 team:
@@ -159,7 +161,7 @@ team:
 +============+===========+===========+===========+===========+===========+
 ```
 
-#Calendar
+# Calendar
 
 `calendar` shows you a simple calendar for previous month, current month and next month.
 
@@ -202,14 +204,14 @@ team:
 +====+====+====+====+====+====+====+
 ```
 
-#Holidays
+# Holidays
 
 Legal holidays are shown depending on user's country, with the holiday name or
 a `*` in the compact view.
 
 _(coming soon)_
 
-#Defining teams
+# Defining teams
 
 People can be assigned to teams.
 
